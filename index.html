@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>劃假表</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#fdf6ee;--surface:#fff9f3;--border:#e8d8c8;
+  --accent:#c0714a;--accent-dark:#8a4a2f;
+  --text:#2a1f17;--text-muted:#8a7060;
+  --wkbg:#f0ddd0;--wkborder:#dfc0a8;
+  --x:#c0714a;--ap:#4a7a9b;--m2:#7a6a9b;--a:#4a9b6a;--p:#9b8a4a;
+  --admin:#3a6b5a;--radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.nav{display:flex;background:var(--accent-dark);position:sticky;top:0;z-index:50}
+.nav-btn{flex:1;padding:13px 4px;border:none;background:transparent;color:rgba(255,255,255,.55);
+  font-family:'Noto Sans TC',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;
+  cursor:pointer;transition:.2s;border-bottom:3px solid transparent}
+.nav-btn.active{color:#fff;border-bottom-color:#f2c89a}
+.nav-btn.hidden{display:none}
+
+.page{display:none;padding:20px 16px 64px;max-width:680px;margin:0 auto}
+.page.active{display:block}
+
+.page-title{text-align:center;margin-bottom:22px}
+.page-title h1{font-size:22px;font-weight:700;letter-spacing:3px;color:var(--accent-dark);margin-bottom:3px}
+.page-title p{font-size:11px;color:var(--text-muted);letter-spacing:1px}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.card label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.req{color:var(--accent)}
+input[type=text],input[type=date],input[type=password]{width:100%;border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 13px;font-size:14px;font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);outline:none;transition:.2s}
+input:focus{border-color:var(--accent)}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;font-size:14px;
+  font-family:'Noto Sans TC',sans-serif;font-weight:700;cursor:pointer;letter-spacing:2px;transition:.2s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-dark)}
+.btn-secondary{background:#f0e8e0;color:var(--text-muted)}.btn-secondary:hover{background:var(--border)}
+.btn-admin{background:var(--admin);color:#fff}.btn-admin:hover{filter:brightness(.9)}
+.btn-danger{background:#c04a4a;color:#fff}.btn-danger:hover{filter:brightness(.9)}
+.btn-row{display:flex;gap:10px;margin-top:12px}.btn-row .btn{flex:1}
+
+.notice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.notice-card{background:#fff4ec;border:1.5px solid var(--wkborder);border-radius:12px;
+  padding:13px 15px;font-size:12px;line-height:1.85;color:var(--text-muted)}
+.notice-card h3{font-size:12px;font-weight:700;color:var(--accent-dark);margin-bottom:5px}
+.notice-card.blue h3{color:var(--ap)}
+.tour-item{display:flex;gap:6px;margin-bottom:1px}
+.emp-name-b{color:var(--text);font-weight:600}
+
+/* closed banner */
+.closed-banner{background:#f5ede4;border:1.5px solid var(--wkborder);border-radius:12px;
+  padding:20px;text-align:center;margin-bottom:18px}
+.closed-banner h2{font-size:16px;font-weight:700;color:var(--accent-dark);margin-bottom:6px}
+.closed-banner p{font-size:12px;color:var(--text-muted)}
+
+.cal-label{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.cal-section{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.cal{border-collapse:collapse;width:max-content;min-width:100%}
+table.cal th,table.cal td{padding:0;text-align:center}
+table.cal thead th{background:#f5ebe0;border-bottom:1.5px solid var(--border);
+  font-size:10px;color:var(--text-muted);padding:5px 0 4px;min-width:52px;position:sticky;top:0;z-index:2}
+table.cal thead th.wk{background:var(--wkbg)}
+table.cal thead th .dn{display:block;font-size:13px;font-weight:700;color:var(--text);line-height:1;margin-bottom:1px}
+table.cal thead th.wk .dn{color:var(--accent-dark)}
+table.cal thead th .dl{display:block;font-size:10px;color:var(--text-muted)}
+table.cal thead th .ww-badge{display:block;font-size:9px;color:var(--accent-dark);
+  font-weight:700;background:rgba(192,113,74,.13);border-radius:3px;
+  padding:0 3px;margin:2px 3px 0;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.cal tbody tr.type-row td:first-child{
+  font-size:11px;font-weight:700;padding:0 8px;min-width:44px;
+  position:sticky;left:0;z-index:1;border-right:1.5px solid var(--border)}
+tr.type-X td:first-child{color:var(--x);background:#fdf0ea}
+tr.type-AP td:first-child{color:var(--ap);background:#e8f3fb}
+tr.type-M2 td:first-child{color:var(--m2);background:#eeecf7}
+tr.type-A td:first-child{color:var(--a);background:#e8f7ef}
+tr.type-P td:first-child{color:var(--p);background:#f7f3e4}
+table.cal tbody tr.type-row td{
+  font-size:11px;border-bottom:1px solid #f0e8e0;min-width:52px;height:32px;position:relative}
+tr.type-X td{background:#fff9f7} tr.type-AP td{background:#f7fbff}
+tr.type-M2 td{background:#f8f7fc} tr.type-A td{background:#f7fcf9}
+tr.type-P td{background:#fdfbf4}
+.check-cell{cursor:pointer;transition:.1s}.check-cell:hover{filter:brightness(.93)}
+.check-cell.day-locked{background:rgba(200,190,180,.18)!important;cursor:not-allowed;opacity:.4}
+.check-cell.sel::after{content:'✓';font-size:15px;font-weight:700;
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+tr.type-X .check-cell.sel::after{color:var(--x)}
+tr.type-AP .check-cell.sel::after{color:var(--ap)}
+tr.type-M2 .check-cell.sel::after{color:var(--m2)}
+tr.type-A .check-cell.sel::after{color:var(--a)}
+tr.type-P .check-cell.sel::after{color:var(--p)}
+
+/* overtime table */
+.overtime-label{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.overtime-section{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+table.ot-tbl{border-collapse:collapse;width:max-content;min-width:100%}
+table.ot-tbl th,table.ot-tbl td{padding:0;text-align:center}
+table.ot-tbl thead th{background:#eaf5ef;border-bottom:1.5px solid var(--border);
+  font-size:10px;color:var(--text-muted);padding:5px 0 4px;min-width:52px;position:sticky;top:0;z-index:2}
+table.ot-tbl thead th.wk{background:#d8eee0}
+table.ot-tbl thead th .dn{display:block;font-size:13px;font-weight:700;color:var(--a);line-height:1;margin-bottom:1px}
+table.ot-tbl thead th .dl{display:block;font-size:10px;color:var(--text-muted)}
+table.ot-tbl thead th .orig-worker{display:block;font-size:9px;color:var(--text-muted);
+  background:rgba(74,154,106,.1);border-radius:3px;padding:0 3px;margin:2px 3px 0;line-height:1.5}
+table.ot-tbl tbody td{border-bottom:1px solid #e8f0ec;min-width:52px;height:32px;position:relative;background:#f7fcf9}
+table.ot-tbl tbody td:first-child{font-size:11px;font-weight:700;color:var(--a);background:#e8f7ef;
+  padding:0 8px;min-width:72px;position:sticky;left:0;z-index:1;border-right:1.5px solid var(--border)}
+.ot-cell{cursor:pointer;transition:.1s}.ot-cell:hover{filter:brightness(.93)}
+.ot-cell.sel::after{content:'✓';font-size:15px;font-weight:700;color:var(--a);
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+
+.counter-row{display:flex;gap:8px;padding:10px 14px;background:#f5ede4;
+  border-top:1.5px solid var(--border);flex-wrap:wrap;align-items:center}
+.cbadge{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;
+  font-family:'DM Mono',monospace;font-size:11px}
+.cbadge .cnt{font-weight:700;font-size:13px}
+.cbadge.X{background:#fdf0eb;color:var(--x)}.cbadge.AP{background:#eaf2f8;color:var(--ap)}
+.cbadge.M2{background:#f0eef8;color:var(--m2)}.cbadge.A{background:#eaf5ef;color:var(--a)}
+.cbadge.P{background:#f5f2e8;color:var(--p)}.cbadge.oth{background:#eeecf7;color:var(--m2)}
+.warn-txt{color:#c04a4a;font-size:10px;margin-left:3px}
+
+.success-overlay{display:none;position:fixed;inset:0;background:rgba(253,246,238,.96);
+  z-index:200;align-items:center;justify-content:center;flex-direction:column;
+  gap:14px;text-align:center;padding:32px}
+.success-overlay.show{display:flex}
+.success-icon{font-size:52px;animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(.4);opacity:0}80%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.success-overlay h2{font-size:20px;font-weight:700;color:var(--accent-dark);letter-spacing:3px}
+.success-overlay p{font-size:13px;color:var(--text-muted)}
+.submit-time{font-size:11px;color:var(--ap);margin-top:4px}
+
+/* ADMIN */
+.sec-title{font-size:11px;font-weight:700;color:var(--admin);letter-spacing:1.5px;
+  text-transform:uppercase;margin:18px 0 8px;display:flex;align-items:center;gap:6px}
+.sec-title::before{content:'';display:inline-block;width:3px;height:13px;background:var(--admin);border-radius:2px}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.admin-grid .field{display:flex;flex-direction:column;gap:4px}
+.wk-entry{display:flex;align-items:center;gap:8px;margin-bottom:6px;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px}
+.wk-entry .dlbl{font-size:12px;font-weight:600;color:var(--text-muted);min-width:90px}
+.wk-entry input[type=text]{flex:1;border:none;background:transparent;padding:0;font-size:14px;font-family:'Noto Sans TC',sans-serif;width:auto}
+.wk-entry input[type=text]:focus{outline:none}
+.wk-entry input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--a)}
+.wk-entry .ot-label{font-size:11px;color:var(--a);font-weight:600;margin-left:2px}
+.tour-entry{display:flex;align-items:center;gap:6px;margin-bottom:6px;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px}
+.tour-entry input{border:none;background:transparent;padding:0;font-size:13px;font-family:'Noto Sans TC',sans-serif;flex:1;width:auto}
+.tour-entry input:focus{outline:none}
+.tour-entry .del-btn{background:none;border:none;cursor:pointer;color:#c04a4a;font-size:18px;line-height:1}
+.add-link{font-size:12px;color:var(--admin);cursor:pointer;text-decoration:underline;margin-bottom:6px;display:inline-block}
+.hint{font-size:11px;color:var(--text-muted);background:#f5ede4;border-radius:6px;padding:6px 10px;margin-bottom:10px}
+.saved-toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--admin);color:#fff;padding:10px 24px;border-radius:20px;
+  font-size:13px;font-weight:600;z-index:300;letter-spacing:1px;white-space:nowrap}
+.saved-toast.show{display:block;animation:fadeup .3s ease}
+@keyframes fadeup{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.pw-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.emp-entry{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:6px;align-items:center;
+  margin-bottom:6px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px}
+.emp-entry .badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.badge-fixed{background:#fdf0ea;color:var(--x)}.badge-rotate{background:#eaf2f8;color:var(--ap)}
+.emp-entry input{border:none;background:transparent;padding:0;font-size:13px;font-family:'Noto Sans TC',sans-serif;min-width:0;width:auto}
+.emp-entry input:focus{outline:none;border-bottom:1px solid var(--accent)}
+.emp-entry .del-btn{background:none;border:none;cursor:pointer;color:#c04a4a;font-size:18px;line-height:1;padding:0}
+.emp-add-row{display:flex;gap:8px;margin-top:4px}
+.emp-add-row button{flex:1;padding:7px;border-radius:8px;border:1.5px dashed var(--border);
+  background:transparent;font-family:'Noto Sans TC',sans-serif;font-size:12px;cursor:pointer;color:var(--text-muted)}
+.emp-add-row button:hover{border-color:var(--admin);color:var(--admin)}
+
+/* BACKEND */
+.be-filter{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.be-filter input{flex:1}
+.be-section{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+table.be-tbl{border-collapse:collapse;width:max-content;min-width:100%}
+table.be-tbl th,table.be-tbl td{padding:0;text-align:center;font-size:11px}
+table.be-tbl thead th{background:#f5ebe0;border-bottom:1.5px solid var(--border);
+  padding:4px 2px;min-width:44px;font-weight:600;color:var(--text-muted);position:sticky;top:0;z-index:2}
+table.be-tbl thead th.wk{background:var(--wkbg);color:var(--accent-dark)}
+table.be-tbl thead th.ot-col{background:#d8eee0;color:var(--a);min-width:80px}
+table.be-tbl thead th:first-child{position:sticky;left:0;z-index:3;min-width:36px;background:#f5ebe0;text-align:left;padding-left:8px}
+table.be-tbl thead th:nth-child(2){position:sticky;left:36px;z-index:3;min-width:80px;background:#f5ebe0;text-align:left;padding-left:6px;border-right:1.5px solid var(--border)}
+table.be-tbl tbody td{border-bottom:1px solid #f0e8e0;height:30px;min-width:44px;position:relative}
+table.be-tbl tbody td:first-child{position:sticky;left:0;background:var(--surface);z-index:2;
+  padding:0 6px;text-align:left;font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace;white-space:nowrap;min-width:36px}
+table.be-tbl tbody td:nth-child(2){position:sticky;left:36px;background:var(--surface);z-index:2;
+  border-right:1.5px solid var(--border);padding:0 6px;text-align:left;font-size:12px;font-weight:600;white-space:nowrap;min-width:80px}
+table.be-tbl tbody tr.group-hdr td{background:#f5ede4;font-size:10px;font-weight:700;
+  color:var(--text-muted);letter-spacing:1px;text-align:left;padding-left:8px;height:22px}
+table.be-tbl tbody tr:last-child td{border-bottom:none}
+/* overtime rows in backend */
+table.be-tbl thead th.ot-day{background:#d8eee0;color:var(--a);min-width:52px}
+table.be-tbl tbody td.ot-day{background:#f2fbf5}
+.be-chip{display:inline-block;padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700}
+.be-chip.X{background:#fdf0eb;color:var(--x)}.be-chip.AP{background:#eaf2f8;color:var(--ap)}
+.be-chip.M2{background:#f0eef8;color:var(--m2)}.be-chip.A{background:#eaf5ef;color:var(--a)}
+.be-chip.P{background:#f5f2e8;color:var(--p)}
+.be-chip.OT{background:#d8eee0;color:var(--a)}
+.be-empty{text-align:center;padding:32px;color:var(--text-muted);font-size:13px}
+.be-meta{font-size:11px;color:var(--text-muted);margin-bottom:10px}
+.be-period{font-size:12px;color:var(--admin);font-weight:600;margin-bottom:6px}
+.sub-time{font-size:10px;color:var(--text-muted);display:block;font-weight:400}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <button class="nav-btn active" id="nav-employee" onclick="switchPage('employee')">✏️ 劃假</button>
+  <button class="nav-btn hidden" id="nav-admin" onclick="switchPage('admin')">⚙️ 管理設定</button>
+  <button class="nav-btn hidden" id="nav-backend" onclick="switchPage('backend')">📊 後台總覽</button>
+  <button class="nav-btn hidden" id="nav-log" onclick="switchPage('log')">📋 填寫紀錄</button>
+  <button class="nav-btn hidden" id="nav-logout" onclick="adminLogout()" style="flex:0.5;font-size:10px">登出</button>
+</div>
+
+<!-- ═══ EMPLOYEE ═══ -->
+<div id="page-employee" class="page active">
+  <div class="page-title"><h1>劃 假 表</h1><p id="submit-period-hint"></p></div>
+
+  <!-- closed banner shown when outside submit window -->
+  <div class="closed-banner" id="closed-banner" style="display:none">
+    <h2>⏰ 目前不在填寫期間</h2>
+    <p id="closed-msg"></p>
+  </div>
+
+  <div id="form-body">
+    <div class="card">
+      <label>你的員編 <span class="req">*</span></label>
+      <input type="text" id="emp-id" placeholder="請輸入員編"
+      oninput="this.value=this.value.toUpperCase();autoFillName();validateEmpId()"
+      onblur="validateEmpId()">
+    <div id="empid-error" style="display:none;color:#c04a4a;font-size:11px;margin-top:5px;padding:4px 8px;
+      background:#fdf0eb;border-radius:6px;border-left:3px solid #c04a4a">
+      ⚠️ 查無此員編，請確認後重新輸入
+    </div>
+    </div>
+    <div class="card">
+      <label>你的姓名 <span class="req">*</span></label>
+      <input type="text" id="emp-name" placeholder="輸入員編可自動帶入姓名">
+    </div>
+
+    <div class="notice-grid">
+      <div class="notice-card">
+        <h3>📋 劃假注意事項</h3>
+        <span id="notice-text-content"></span>
+      </div>
+      <div class="notice-card blue">
+        <h3>🗓 假日加班</h3>
+        <div id="notice-weekend"></div>
+      </div>
+    </div>
+    <div class="notice-card" id="notice-tour-wrap" style="margin-bottom:14px">
+      <h3>✈️ 旅遊登記</h3>
+      <div id="notice-tour"></div>
+    </div>
+
+    <div class="cal-label">請勾選想劃假的日期（可多選）</div>
+    <div class="cal-section">
+      <div class="table-wrap">
+        <table class="cal"><thead id="cal-head"></thead><tbody id="cal-body"></tbody></table>
+      </div>
+      <div class="counter-row" id="counters"></div>
+    </div>
+
+    <div id="ot-wrap">
+      <div class="overtime-label">假日自願加班（可多選）</div>
+      <div class="overtime-section">
+        <div class="table-wrap">
+          <table class="ot-tbl"><thead id="ot-head"></thead><tbody id="ot-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearAll()">清除全部</button>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitForm()">送出</button>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:28px">
+    <span onclick="showAdminLogin()"
+      style="font-size:10px;color:var(--border);cursor:pointer;user-select:none;letter-spacing:1px">
+      管理員登入
+    </span>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LOGIN MODAL ═══ -->
+<div id="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(42,31,23,.5);
+  z-index:150;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--radius);padding:28px 24px;width:300px;
+    border:1.5px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.18)">
+    <h3 style="font-size:15px;font-weight:700;color:var(--accent-dark);letter-spacing:2px;margin-bottom:16px;text-align:center">管理員登入</h3>
+    <input type="password" id="admin-pw" placeholder="請輸入密碼" style="margin-bottom:10px"
+      onkeydown="if(event.key==='Enter')adminLogin()">
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeAdminModal()">取消</button>
+      <button class="btn btn-admin" onclick="adminLogin()">登入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="page-admin" class="page">
+  <div class="page-title"><h1>管理設定</h1><p>設定後按「儲存並套用」即生效</p></div>
+
+  <div class="sec-title">修改管理員密碼</div>
+  <div class="card">
+    <div class="pw-grid">
+      <div><label>新密碼</label><input type="password" id="pw-new" placeholder="輸入新密碼"></div>
+      <div><label>確認密碼</label><input type="password" id="pw-confirm" placeholder="再輸入一次"></div>
+    </div>
+    <button class="btn btn-secondary" style="margin-top:10px;font-size:12px;letter-spacing:1px" onclick="changePw()">更新密碼</button>
+  </div>
+
+  <div class="sec-title">雲端連線設定</div>
+  <div class="card">
+    <label>Apps Script 網址</label>
+    <input type="text" id="cfg-script-url" placeholder="https://script.google.com/macros/s/…/exec"
+      style="font-size:12px;font-family:'DM Mono',monospace">
+    <button class="btn btn-secondary" onclick="saveScriptUrl()"
+      style="margin-top:8px;font-size:12px;letter-spacing:1px">儲存網址</button>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:6px" id="cloud-status">
+      尚未設定網址
+    </p>
+  </div>
+
+  <div class="sec-title">開放填寫時間</div>
+  <div class="card">
+    <div class="admin-grid">
+      <div class="field"><label>開始日期</label><input type="date" id="submit-open"></div>
+      <div class="field"><label>截止日期</label><input type="date" id="submit-close"></div>
+    </div>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:6px">
+      限制員工只能在此期間內填寫劃假表。留空則永遠開放。
+    </p>
+  </div>
+
+  <div class="sec-title">劃假注意事項</div>
+  <div class="card">
+    <label>公告內容</label>
+    <!-- Toolbar -->
+    <div id="editor-toolbar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+      <button type="button" onclick="edCmd('bold')" title="粗體"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
+          font-weight:700;font-size:13px;cursor:pointer;font-family:serif">B</button>
+      <button type="button" onclick="edCmd('italic')" title="斜體"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
+          font-style:italic;font-size:13px;cursor:pointer;font-family:serif">I</button>
+      <button type="button" onclick="edCmd('underline')" title="底線"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
+          text-decoration:underline;font-size:13px;cursor:pointer">U</button>
+      <span style="width:1px;background:var(--border);margin:0 2px;align-self:stretch"></span>
+      <select onchange="edColor(this.value);this.value=''" title="文字顏色"
+        style="padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer">
+        <option value="">🎨 顏色</option>
+        <option value="#c0714a">🟠 橘</option>
+        <option value="#4a7a9b">🔵 藍</option>
+        <option value="#4a9b6a">🟢 綠</option>
+        <option value="#9b8a4a">🟡 黃褐</option>
+        <option value="#c04a4a">🔴 紅</option>
+        <option value="#7a6a9b">🟣 紫</option>
+        <option value="#2a1f17">⚫ 黑</option>
+      </select>
+      <select onchange="edSize(this.value);this.value=''" title="文字大小"
+        style="padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer">
+        <option value="">📏 大小</option>
+        <option value="1">極小</option>
+        <option value="2">小</option>
+        <option value="3">標準</option>
+        <option value="4">大</option>
+        <option value="5">極大</option>
+      </select>
+      <span style="width:1px;background:var(--border);margin:0 2px;align-self:stretch"></span>
+      <button type="button" onclick="edCmd('insertUnorderedList')" title="項目清單"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:13px;cursor:pointer">☰</button>
+      <button type="button" onclick="edClear()" title="清除格式"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--text-muted)">✕格式</button>
+    </div>
+    <!-- Editable area -->
+    <div id="cfg-notice" contenteditable="true"
+      style="min-height:90px;border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;
+        font-size:13px;font-family:'Noto Sans TC',sans-serif;background:var(--bg);
+        color:var(--text);outline:none;line-height:1.8;cursor:text"
+      oninput="syncNoticeToEditor()"
+      onfocus="document.getElementById('editor-toolbar').style.borderColor='var(--accent)'">
+    </div>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:6px">選取文字後點工具列套用格式；Enter 換行</p>
+  </div>
+
+  <div class="sec-title">員工資料</div>
+  <div class="hint">員工填入員編後會自動帶入姓名；後台依固定班／可輪班分組顯示</div>
+  <div class="card">
+    <div style="font-size:11px;font-weight:700;color:var(--x);letter-spacing:1px;margin-bottom:6px">固定班</div>
+    <div id="emp-fixed-list"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--ap);letter-spacing:1px;margin:12px 0 6px">可輪班</div>
+    <div id="emp-rotate-list"></div>
+    <div class="emp-add-row">
+      <button onclick="addEmp('fixed')">＋ 新增固定班</button>
+      <button onclick="addEmp('rotate')">＋ 新增可輪班</button>
+    </div>
+  </div>
+
+  <div class="sec-title">期別設定（4週）</div>
+  <div class="card">
+    <div class="admin-grid">
+      <div class="field"><label>開始日期</label><input type="date" id="cfg-start"></div>
+      <div class="field"><label>結束日期</label><input type="date" id="cfg-end" readonly style="opacity:.55"></div>
+    </div>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:4px">結束日期自動為開始後 27 天（共 28 天）</p>
+  </div>
+
+  <div class="sec-title">假日加班人員 ＆ 自願加班開放日</div>
+  <div class="hint">
+    輸入排定加班人員後，名字會顯示在表頭。<br>
+    勾選「開放自願加班」，該日期才會出現在同仁的自願加班選單中。
+  </div>
+  <div class="card" id="weekend-cfg"></div>
+
+  <div class="sec-title">旅遊登記</div>
+  <div class="card">
+    <div id="tour-entries"></div>
+    <span class="add-link" onclick="addTourEntry()">＋ 新增旅遊登記</span>
+  </div>
+
+  <button class="btn btn-admin" onclick="saveConfig()">✅ 儲存並套用</button>
+</div>
+
+<!-- ═══ BACKEND ═══ -->
+<div id="page-backend" class="page">
+  <div class="page-title"><h1>後台總覽</h1><p>同仁以最後一次送出為最終資料</p></div>
+  <div class="be-period" id="be-period"></div>
+  <div class="be-filter">
+    <input type="text" id="be-search" placeholder="搜尋員編或姓名…" oninput="renderBackend()">
+    <button class="btn btn-danger" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0" onclick="clearSubmissions()">清除紀錄</button>
+  </div>
+  <div class="be-meta" id="be-meta"></div>
+  <div class="be-section">
+    <div class="table-wrap">
+      <table class="be-tbl"><thead id="be-head"></thead><tbody id="be-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOG PAGE ═══ -->
+<div id="page-log" class="page">
+  <div class="page-title"><h1>填寫紀錄</h1><p>所有送出紀錄（含重複送出）</p></div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+    <input type="text" id="log-search" placeholder="搜尋員編或姓名…" oninput="renderLog()"
+      style="flex:1;border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13px;background:var(--bg);outline:none">
+    <button onclick="clearLog()" class="btn btn-danger" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0">清除紀錄</button>
+  </div>
+  <div class="be-meta" id="log-meta"></div>
+  <div class="be-section">
+    <div class="table-wrap">
+      <table class="be-tbl" id="log-tbl">
+        <thead id="log-head"></thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="success-overlay" id="success">
+  <div class="success-icon">🎉</div>
+  <h2>送出成功！</h2>
+  <p id="success-detail"></p>
+  <p class="submit-time" id="success-time"></p>
+  <p style="font-size:11px;color:var(--ap);margin-top:2px">可重新填寫以更新資料，系統以最後一次為準</p>
+  <button class="btn btn-secondary" style="max-width:200px;margin-top:8px" onclick="resetForm()">重新填寫</button>
+</div>
+<div class="saved-toast" id="saved-toast">✅ 設定已儲存</div>
+
+<script>
+// ═══════════ CONFIG ═══════════
+const DEFAULT_CFG = {
+  startDate:   '2026-07-06',
+  adminPw:     '1234',
+  submitOpen:  '',
+  submitClose: '',
+  employees: {
+    fixed: [
+      {empId:'A00453',name:'侯宜含'},
+      {empId:'A00601',name:'徐容草'},
+      {empId:'A01746',name:'粟秋薇'},
+    ],
+    rotate: [
+      {empId:'A00934',name:'潘元翔'},
+      {empId:'A00970',name:'陳明葶'},
+      {empId:'A01279',name:'宋宇茜'},
+      {empId:'A01908',name:'林宜諾'},
+      {empId:'A01924',name:'鄭惠珊'},
+      {empId:'A02267',name:'林尚額'},
+      {empId:'A02426',name:'陳怡婷'},
+      {empId:'A02468',name:'陳彥志'},
+    ]
+  },
+  weekendWorkers: {
+    '07/11':'宇茜','07/12':'元翔',
+    '07/18':'惠珊','07/19':'容苹',
+    '07/25':'彥志','07/26':'元翔',
+    '08/01':'元翔','08/02':'明葶'
+  },
+  // 管理員開放的自願加班日期 (key=MM/DD, val=true)
+  workDates: {},
+  overtimeDates: {},
+  noticeText: '每人限劃假 <strong>4個 X</strong>，<strong>2個其他休假</strong><br><small>（除非已登記旅遊）</small>',
+  tours:[
+    {empId:'A00970',name:'明葶',range:'7/18 – 7/20'},
+    {empId:'A00934',name:'元翔',range:'7/25 – 7/28'},
+    {empId:'A01908',name:'容苹',range:'7/29 – 8/2'}
+  ]
+};
+
+let cfg = JSON.parse(localStorage.getItem('leaveCfg')||'null') || JSON.parse(JSON.stringify(DEFAULT_CFG));
+if(!cfg.employees)    cfg.employees    = DEFAULT_CFG.employees;
+if(!cfg.adminPw)      cfg.adminPw      = '1234';
+if(!cfg.overtimeDates)cfg.overtimeDates= {};
+if(!cfg.workDates)   cfg.workDates    = {};
+if(!cfg.noticeText)  cfg.noticeText   = DEFAULT_CFG.noticeText;
+if(!cfg.submitOpen)   cfg.submitOpen   = '';
+if(!cfg.submitClose)  cfg.submitClose  = '';
+
+let submissions = JSON.parse(localStorage.getItem('leaveSubmissions')||'[]');
+let submitLog   = JSON.parse(localStorage.getItem('leaveSubmitLog')||'[]');
+let adminAuthed = false;
+
+// ═══ 雲端設定（填入你的 Apps Script 網址）═══
+let SCRIPT_URL = localStorage.getItem('scriptUrl') || '';
+
+async function cloudPost(payload){
+  if(!SCRIPT_URL) return null;
+  try{
+    const r = await fetch(SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify(payload)
+    });
+    return await r.json();
+  }catch(e){ console.warn('cloud error',e); return null; }
+}
+async function cloudGet(action){
+  if(!SCRIPT_URL) return null;
+  try{
+    const r = await fetch(`${SCRIPT_URL}?action=${action}`);
+    return await r.json();
+  }catch(e){ console.warn('cloud error',e); return null; }
+}
+
+const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
+const DAY_ZH  = ['日','一','二','三','四','五','六'];
+
+// ═══════════ DATE HELPERS ═══════════
+function genDates(startStr){
+  const [y,m,d]=startStr.split('-').map(Number);
+  return Array.from({length:28},(_,i)=>{
+    const dt=new Date(y,m-1,d+i);
+    const mm=String(dt.getMonth()+1).padStart(2,'0');
+    const dd=String(dt.getDate()).padStart(2,'0');
+    return {m:mm,d:dd,w:DAY_ZH[dt.getDay()],key:`${mm}/${dd}`};
+  });
+}
+function isWeekend(dt){return dt.w==='六'||dt.w==='日';}
+function addDays(s,n){
+  const [y,m,d]=s.split('-').map(Number);
+  const dt=new Date(y,m-1,d+n);
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+function todayStr(){
+  const n=new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+// ═══════════ SUBMIT WINDOW CHECK ═══════════
+function isSubmitOpen(){
+  if(!cfg.submitOpen && !cfg.submitClose) return true;
+  const today=todayStr();
+  const afterOpen  = !cfg.submitOpen  || today >= cfg.submitOpen;
+  const beforeClose= !cfg.submitClose || today <= cfg.submitClose;
+  return afterOpen && beforeClose;
+}
+
+// ═══════════ NAV ═══════════
+function switchPage(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  if(p==='employee') buildEmployeePage();
+  if(p==='admin')    renderAdminContent();
+  if(p==='backend')  renderBackend();
+  if(p==='log')       renderLog();
+}
+function showAdminTabs(show){
+  ['admin','backend','log','logout'].forEach(id=>document.getElementById('nav-'+id).classList.toggle('hidden',!show));
+}
+
+// ═══════════ AUTH ═══════════
+function showAdminLogin(){
+  document.getElementById('admin-modal').style.display='flex';
+  document.getElementById('admin-pw').value='';
+  setTimeout(()=>document.getElementById('admin-pw').focus(),100);
+}
+function closeAdminModal(){document.getElementById('admin-modal').style.display='none';}
+function adminLogin(){
+  if(document.getElementById('admin-pw').value===cfg.adminPw){
+    adminAuthed=true;closeAdminModal();showAdminTabs(true);switchPage('admin');
+  }else{alert('密碼錯誤！');document.getElementById('admin-pw').value='';}
+}
+function adminLogout(){adminAuthed=false;showAdminTabs(false);switchPage('employee');}
+function changePw(){
+  const nw=document.getElementById('pw-new').value;
+  const cf=document.getElementById('pw-confirm').value;
+  if(!nw){alert('請輸入新密碼');return;}
+  if(nw!==cf){alert('兩次密碼不一致！');return;}
+  if(nw.length<4){alert('密碼至少 4 個字元');return;}
+  cfg.adminPw=nw;
+  localStorage.setItem('leaveCfg',JSON.stringify(cfg));
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-confirm').value='';
+  showToast('✅ 密碼已更新');
+}
+
+// ═══════════ EMPLOYEE PAGE ═══════════
+const state={};
+TYPES.forEach(t=>{state[t.id]={};});
+const otState={};
+
+function allEmployees(){return [...(cfg.employees.fixed||[]),...(cfg.employees.rotate||[])];}
+
+function autoFillName(){
+  const id=document.getElementById('emp-id').value.trim().toUpperCase();
+  const emp=allEmployees().find(e=>e.empId===id);
+  if(emp)document.getElementById('emp-name').value=emp.name;
+}
+function validateEmpId(){
+  const id=document.getElementById('emp-id').value.trim().toUpperCase();
+  const errEl=document.getElementById('empid-error');
+  if(!id){errEl.style.display='none';return true;}
+  const valid=!!allEmployees().find(e=>e.empId===id);
+  errEl.style.display=valid?'none':'block';
+  return valid;
+}
+
+function buildEmployeePage(){
+  const dates=genDates(cfg.startDate);
+  const open=isSubmitOpen();
+
+  // period hint
+  let hint='如需更改可重新填寫，系統以最後一次為準';
+  if(cfg.submitOpen||cfg.submitClose){
+    const parts=[];
+    if(cfg.submitOpen)  parts.push(`開放：${cfg.submitOpen.replace(/-/g,'/')}`);
+    if(cfg.submitClose) parts.push(`截止：${cfg.submitClose.replace(/-/g,'/')}`);
+    hint=parts.join('　');
+  }
+  document.getElementById('submit-period-hint').textContent=hint;
+
+  // show/hide form vs closed banner
+  document.getElementById('closed-banner').style.display=open?'none':'block';
+  document.getElementById('form-body').style.display=open?'block':'none';
+
+  if(!open){
+    const today=todayStr();
+    let msg='';
+    if(cfg.submitOpen && today<cfg.submitOpen)
+      msg=`填寫將於 ${cfg.submitOpen.replace(/-/g,'/')} 開放`;
+    else if(cfg.submitClose && today>cfg.submitClose)
+      msg=`填寫已於 ${cfg.submitClose.replace(/-/g,'/')} 截止`;
+    document.getElementById('closed-msg').textContent=msg;
+    return;
+  }
+
+  renderNotices(dates);
+  buildCalendar(dates);
+  buildOvertimeTable(dates);
+  updateCounters();
+}
+
+function renderNotices(dates){
+  const ntEl=document.getElementById('notice-text-content');
+  if(ntEl)ntEl.innerHTML=cfg.noticeText||'';
+  const el=document.getElementById('notice-weekend');
+  // Show all dates admin marked as workdays
+  const workEntries=Object.entries(cfg.workDates||{})
+    .filter(([k,v])=>v)
+    .map(([key])=>{
+      const dt=dates.find(x=>x.key===key);
+      const name=cfg.weekendWorkers[key]||'';
+      return `${key.replace(/^0/,'')}${dt?`（${dt.w}）`:''} ${name||'—'}`;
+    });
+  el.innerHTML=workEntries.join('<br>')||'（尚未設定）';
+  const tw=document.getElementById('notice-tour-wrap');
+  const tc=document.getElementById('notice-tour');
+  if(!cfg.tours.length){tw.style.display='none';return;}
+  tw.style.display='';
+  tc.innerHTML=cfg.tours.map(t=>`<div class="tour-item"><span class="emp-name-b">${t.name}</span><span>${t.range}</span></div>`).join('');
+}
+
+function buildCalendar(dates){
+  let hh=`<tr><th style="position:sticky;left:0;z-index:3;background:#f5ebe0;min-width:44px;border-right:1.5px solid var(--border)"></th>`;
+  dates.forEach(d=>{
+    const wk=isWeekend(d)?'wk':'';
+    const showWork=cfg.workDates&&cfg.workDates[d.key];
+    const worker=showWork?(cfg.weekendWorkers[d.key]||'加班'):''
+    hh+=`<th class="${wk}"><span class="dn">${d.m}/${d.d}</span><span class="dl">${d.w}</span>${worker?`<span class="ww-badge">${worker}</span>`:''}</th>`;
+  });
+  document.getElementById('cal-head').innerHTML=hh+'</tr>';
+  let bh='';
+  TYPES.forEach(t=>{
+    bh+=`<tr class="type-row type-${t.id}"><td>${t.label}</td>`;
+    dates.forEach((d,i)=>{
+      const wk=isWeekend(d)?'wk':'';
+      const sel=state[t.id][i]?'sel':'';
+      bh+=`<td class="check-cell ${wk} ${sel}" data-type="${t.id}" data-idx="${i}" onclick="toggle('${t.id}',${i})"></td>`;
+    });
+    bh+='</tr>';
+  });
+  document.getElementById('cal-body').innerHTML=bh;
+}
+
+function buildOvertimeTable(dates){
+  // Only show dates that admin has opened for volunteer OT
+  const otDates=dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+  const wrap=document.getElementById('ot-wrap');
+  if(!otDates.length){wrap.style.display='none';return;}
+  wrap.style.display='';
+
+  let hh=`<tr><th style="position:sticky;left:0;z-index:3;background:#eaf5ef;min-width:72px;border-right:1.5px solid var(--border)">假日加班</th>`;
+  otDates.forEach(d=>{
+    const origWorker=cfg.weekendWorkers[d.key]||'';
+    hh+=`<th class="wk">
+      <span class="dn">${d.m}/${d.d}</span>
+      <span class="dl">${d.w}</span>
+      ${origWorker?`<span class="orig-worker">${origWorker}</span>`:''}
+    </th>`;
+  });
+  document.getElementById('ot-head').innerHTML=hh+'</tr>';
+
+  let bh=`<tr><td>自願加班</td>`;
+  otDates.forEach(d=>{
+    const sel=otState[d.key]?'sel':'';
+    bh+=`<td class="ot-cell ${sel}" data-key="${d.key}" onclick="toggleOT('${d.key}')"></td>`;
+  });
+  document.getElementById('ot-body').innerHTML=bh+'</tr>';
+}
+
+function toggle(typeId,idx){
+  const cur=state[typeId][idx]||false;
+  if(!cur){
+    // Same-day exclusion: if any type already selected for this date, block
+    const alreadyThisDay=TYPES.some(t=>t.id!==typeId&&state[t.id][idx]);
+    if(alreadyThisDay){
+      const dates=genDates(cfg.startDate);
+      const d=dates[idx];
+      alert(`${d.m}/${d.d} 同一天只能選一種假別！`);
+      return;
+    }
+    const currentId=document.getElementById('emp-id').value.trim().toUpperCase();
+    const onTour=!!(cfg.tours||[]).find(t=>t.empId&&t.empId===currentId);
+    if(!onTour){
+      if(typeId==='X'){
+        if(Object.values(state.X).filter(Boolean).length>=4){alert('X 假最多只能劃 4 個！');return;}
+      }else{
+        const oth=['AP','M2','A','P'].reduce((s,t)=>s+Object.values(state[t]).filter(Boolean).length,0);
+        if(oth>=2){alert('其他休假（AP/-2/A/P）合計最多 2 個！');return;}
+      }
+    }
+  }
+  state[typeId][idx]=!cur;
+  const cell=document.querySelector(`td[data-type="${typeId}"][data-idx="${idx}"]`);
+  if(cell)cell.classList.toggle('sel',state[typeId][idx]);
+  // Grey out other type cells for this date
+  updateDayLock(idx);
+  updateCounters();
+}
+
+function updateDayLock(idx){
+  const anySelected=TYPES.some(t=>state[t.id][idx]);
+  TYPES.forEach(t=>{
+    const cell=document.querySelector(`td[data-type="${t.id}"][data-idx="${idx}"]`);
+    if(!cell)return;
+    if(anySelected&&!state[t.id][idx]){
+      cell.classList.add('day-locked');
+    }else{
+      cell.classList.remove('day-locked');
+    }
+  });
+}
+function toggleOT(key){
+  otState[key]=!otState[key];
+  const cell=document.querySelector(`td.ot-cell[data-key="${key}"]`);
+  if(cell)cell.classList.toggle('sel',otState[key]);
+}
+function updateCounters(){
+  const currentId=document.getElementById('emp-id').value.trim().toUpperCase();
+  const onTour=!!(cfg.tours||[]).find(t=>t.empId&&t.empId===currentId);
+  const xc=Object.values(state.X).filter(Boolean).length;
+  const oth=['AP','M2','A','P'].reduce((s,t)=>s+Object.values(state[t]).filter(Boolean).length,0);
+  if(onTour){
+    let html=`<div class="cbadge X"><span class="cnt">${xc}</span> X</div>`;
+    ['AP','M2','A','P'].forEach(t=>{
+      const c=Object.values(state[t]).filter(Boolean).length;
+      if(c>0)html+=`<div class="cbadge ${t}"><span class="cnt">${c}</span> ${t==='M2'?'-2':t}</div>`;
+    });
+    html+=`<div class="cbadge oth" style="margin-left:auto;background:#d8eee0;color:var(--a)">✈️ 旅遊不限天數</div>`;
+    document.getElementById('counters').innerHTML=html;
+  }else{
+    let html=`<div class="cbadge X"><span class="cnt">${xc}/4</span> X${xc>=4?'<span class="warn-txt">已滿</span>':''}</div>`;
+    ['AP','M2','A','P'].forEach(t=>{
+      const c=Object.values(state[t]).filter(Boolean).length;
+      if(c>0)html+=`<div class="cbadge ${t}"><span class="cnt">${c}</span> ${t==='M2'?'-2':t}</div>`;
+    });
+    html+=`<div class="cbadge oth" style="margin-left:auto"><span class="cnt">${oth}/2</span> 其他${oth>=2?'<span class="warn-txt">已滿</span>':''}</div>`;
+    document.getElementById('counters').innerHTML=html;
+  }
+}
+function clearAll(){
+  TYPES.forEach(t=>{state[t.id]={};});
+  Object.keys(otState).forEach(k=>{otState[k]=false;});
+  document.querySelectorAll('.check-cell.sel,.ot-cell.sel').forEach(el=>el.classList.remove('sel'));
+  document.querySelectorAll('.check-cell.day-locked').forEach(el=>el.classList.remove('day-locked'));
+  updateCounters();
+}
+
+function submitForm(){
+  if(!isSubmitOpen()){alert('目前不在填寫期間，無法送出！');return;}
+  const id=document.getElementById('emp-id').value.trim();
+  const name=document.getElementById('emp-name').value.trim();
+  if(!id){alert('請輸入員編！');return;}
+  if(!validateEmpId()){alert('員編查無此人，請確認後重新輸入！');return;}
+  if(!name){alert('請輸入姓名！');return;}
+
+  const dates=genDates(cfg.startDate);
+  const picks={};
+  TYPES.forEach(t=>{
+    Object.entries(state[t.id]).forEach(([idx,v])=>{
+      if(v){const key=dates[parseInt(idx)].key;if(!picks[key])picks[key]=[];picks[key].push(t.id);}
+    });
+  });
+  const overtime=Object.keys(otState).filter(k=>otState[k]);
+  const isFixed=!!(cfg.employees.fixed||[]).find(e=>e.empId===id);
+  const group=isFixed?'fixed':'rotate';
+  const now=new Date().toLocaleString('zh-TW');
+
+  // Always upsert — last submission wins
+  const existing=submissions.findIndex(s=>s.empId===id);
+  const record={empId:id,name,picks,overtime,group,submittedAt:now};
+  if(existing>=0){
+    submissions[existing]=record;
+  }else{
+    submissions.push(record);
+  }
+  localStorage.setItem('leaveSubmissions',JSON.stringify(submissions));
+  // Append every submission to full log
+  submitLog.push({...record, logId: Date.now()});
+  localStorage.setItem('leaveSubmitLog',JSON.stringify(submitLog));
+  // Sync to cloud
+  cloudPost({action:'submit', ...record});
+
+  const total=Object.values(picks).flat().length;
+  document.getElementById('success-detail').textContent=
+    `${name}（${id}）已登記 ${total} 筆假期，自願加班 ${overtime.length} 天`;
+  document.getElementById('success-time').textContent=`送出時間：${now}`;
+  document.getElementById('success').classList.add('show');
+}
+function resetForm(){
+  document.getElementById('emp-id').value='';
+  document.getElementById('emp-name').value='';
+  clearAll();
+  document.getElementById('success').classList.remove('show');
+}
+
+// ═══════════ ADMIN ═══════════
+function renderAdminContent(){
+  // Load script URL
+  const su = document.getElementById('cfg-script-url');
+  if(su) su.value = SCRIPT_URL||'';
+  updateCloudStatus();
+  document.getElementById('cfg-start').value=cfg.startDate;
+  document.getElementById('cfg-end').value=addDays(cfg.startDate,27);
+  document.getElementById('submit-open').value=cfg.submitOpen||'';
+  document.getElementById('cfg-notice').innerHTML=cfg.noticeText||'';
+  document.getElementById('submit-close').value=cfg.submitClose||'';
+  document.getElementById('cfg-start').oninput=function(){
+    if(this.value)document.getElementById('cfg-end').value=addDays(this.value,27);
+    refreshWeekendFields();
+  };
+  renderEmpLists();
+  refreshWeekendFields();
+  renderTourEntries();
+}
+
+function renderEmpLists(){
+  ['fixed','rotate'].forEach(grp=>{
+    const list=cfg.employees[grp]||[];
+    const badge=grp==='fixed'?'badge-fixed':'badge-rotate';
+    const label=grp==='fixed'?'固定':'輪班';
+    document.getElementById(`emp-${grp}-list`).innerHTML=list.map((e,i)=>`
+      <div class="emp-entry">
+        <span class="badge ${badge}">${label}</span>
+        <input type="text" placeholder="員編" value="${e.empId}" oninput="this.value=this.value.toUpperCase();cfg.employees.${grp}[${i}].empId=this.value">
+        <input type="text" placeholder="姓名" value="${e.name}" oninput="cfg.employees.${grp}[${i}].name=this.value">
+        <button class="del-btn" onclick="removeEmp('${grp}',${i})">×</button>
+      </div>`).join('');
+  });
+}
+function addEmp(grp){cfg.employees[grp].push({empId:'',name:''});renderEmpLists();}
+function removeEmp(grp,i){cfg.employees[grp].splice(i,1);renderEmpLists();}
+
+function refreshWeekendFields(){
+  const start=document.getElementById('cfg-start').value||cfg.startDate;
+  const dates=genDates(start);
+  // Show ALL 28 dates — admin ticks which ones need OT work
+  document.getElementById('weekend-cfg').innerHTML=dates.map(d=>{
+    const wkStyle=isWeekend(d)?'font-weight:700;color:var(--accent-dark)':'';
+    const isWk=isWeekend(d);
+    return `<div class="wk-entry" style="${isWk?'background:#fff4ec':''}">
+      <span class="dlbl" style="${wkStyle}">${d.m}/${d.d}（${d.w}）</span>
+      <input type="checkbox" ${cfg.workDates&&cfg.workDates[d.key]?'checked':''} data-wkkey="${d.key}" class="wk-check">
+      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
+      <input type="text" placeholder="加班人員" value="${cfg.weekendWorkers[d.key]||''}"
+        data-key="${d.key}" class="ww-input" style="max-width:90px">
+      <input type="checkbox" ${cfg.overtimeDates[d.key]?'checked':''} data-otkey="${d.key}" class="ot-check">
+      <span class="ot-label">開放自願</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTourEntries(){
+  document.getElementById('tour-entries').innerHTML=cfg.tours.map((t,i)=>`
+    <div class="tour-entry">
+      <input type="text" placeholder="員編" value="${t.empId||''}"
+        oninput="this.value=this.value.toUpperCase();cfg.tours[${i}].empId=this.value"
+        style="max-width:80px;font-family:'DM Mono',monospace;font-size:12px">
+      <input type="text" placeholder="姓名" value="${t.name}" oninput="cfg.tours[${i}].name=this.value" style="max-width:64px">
+      <span style="color:var(--text-muted)">·</span>
+      <input type="text" placeholder="日期範圍（如 7/18 – 7/20）" value="${t.range}" oninput="cfg.tours[${i}].range=this.value">
+      <button class="del-btn" onclick="removeTour(${i})">×</button>
+    </div>`).join('');
+}
+function addTourEntry(){cfg.tours.push({empId:'',name:'',range:''});renderTourEntries();}
+function removeTour(i){cfg.tours.splice(i,1);renderTourEntries();}
+
+function saveConfig(){
+  cfg.startDate  =document.getElementById('cfg-start').value||cfg.startDate;
+  cfg.noticeText =document.getElementById('cfg-notice').innerHTML||cfg.noticeText;
+  cfg.submitOpen =document.getElementById('submit-open').value||'';
+  cfg.submitClose=document.getElementById('submit-close').value||'';
+  const newWW={};const newOT={};const newWK={};
+  document.querySelectorAll('.ww-input').forEach(el=>{
+    const v=el.value.trim();if(v)newWW[el.dataset.key]=v;
+  });
+  document.querySelectorAll('.ot-check').forEach(el=>{
+    if(el.checked)newOT[el.dataset.otkey]=true;
+  });
+  document.querySelectorAll('.wk-check').forEach(el=>{
+    if(el.checked)newWK[el.dataset.wkkey]=true;
+  });
+  cfg.weekendWorkers=newWW;
+  cfg.overtimeDates=newOT;
+  cfg.workDates=newWK;
+  localStorage.setItem('leaveCfg',JSON.stringify(cfg));
+  showToast('✅ 設定已儲存');
+  refreshWeekendFields();
+  // Sync config to cloud
+  cloudPost({action:'saveConfig', cfg});
+}
+function saveScriptUrl(){
+  const url = document.getElementById('cfg-script-url').value.trim();
+  SCRIPT_URL = url;
+  localStorage.setItem('scriptUrl', url);
+  updateCloudStatus();
+  if(url){
+    showToast('✅ 網址已儲存，正在測試連線…');
+    loadCloudConfig();
+  }
+}
+function updateCloudStatus(){
+  const el = document.getElementById('cloud-status');
+  if(!el) return;
+  if(SCRIPT_URL){
+    el.innerHTML = `<span style="color:var(--a)">✅ 已設定</span>　<span style="color:var(--text-muted);font-size:10px;word-break:break-all">${SCRIPT_URL}</span>`;
+  } else {
+    el.textContent = '尚未設定網址';
+  }
+}
+async function loadCloudConfig(){
+  const res = await cloudGet('getConfig');
+  if(res && res.ok && res.cfg){
+    cfg = res.cfg;
+    // ensure migrations
+    if(!cfg.employees)    cfg.employees    = DEFAULT_CFG.employees;
+    if(!cfg.adminPw)      cfg.adminPw      = '1234';
+    if(!cfg.overtimeDates)cfg.overtimeDates= {};
+    if(!cfg.workDates)    cfg.workDates    = {};
+    if(!cfg.noticeText)   cfg.noticeText   = DEFAULT_CFG.noticeText;
+    if(!cfg.submitOpen)   cfg.submitOpen   = '';
+    if(!cfg.submitClose)  cfg.submitClose  = '';
+    localStorage.setItem('leaveCfg', JSON.stringify(cfg));
+    showToast('✅ 已從雲端載入最新設定');
+    renderAdminContent();
+    buildEmployeePage();
+  }
+}
+
+function showToast(msg){
+  const t=document.getElementById('saved-toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ═══════════ BACKEND ═══════════
+async function renderBackend(){
+  // Try to fetch fresh data from cloud
+  if(SCRIPT_URL){
+    const res = await cloudGet('getData');
+    if(res && res.ok){
+      if(res.submissions) submissions = res.submissions;
+      if(res.submitLog)   submitLog   = res.submitLog;
+    }
+  }
+  const dates=genDates(cfg.startDate);
+  const last=dates[dates.length-1];
+  document.getElementById('be-period').textContent=
+    `期別：${cfg.startDate.replace(/-/g,'/')} ～ ${last.m}/${last.d}`;
+
+  const q=(document.getElementById('be-search')||{}).value||'';
+  const filtered=submissions.filter(s=>s.empId.includes(q)||s.name.includes(q));
+  document.getElementById('be-meta').textContent=`共 ${filtered.length} 位同仁已送出`;
+
+  // OT dates that admin opened
+  const otDates=dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+
+  // HEAD: 員編 | 姓名 | 28 dates | OT dates (each col)
+  let hh=`<tr><th>員編</th><th>姓名</th>`;
+  dates.forEach(d=>{
+    const wk=isWeekend(d)?'wk':'';
+    hh+=`<th class="${wk}">${d.m}/${d.d}<br><span style="font-size:9px;font-weight:400">${d.w}</span></th>`;
+  });
+  // one col per OT date
+  otDates.forEach(d=>{
+    hh+=`<th class="ot-day">${d.m}/${d.d}<br><span style="font-size:9px;font-weight:400">加班</span></th>`;
+  });
+  hh+='</tr>';
+  document.getElementById('be-head').innerHTML=hh;
+
+  if(!filtered.length){
+    document.getElementById('be-body').innerHTML=
+      `<tr><td colspan="${dates.length+2+otDates.length}" class="be-empty">尚無劃假紀錄</td></tr>`;
+    return;
+  }
+
+  function rowHTML(s){
+    let r=`<tr>
+      <td style="font-size:10px;font-family:'DM Mono',monospace">${s.empId}</td>
+      <td>${s.name}<span class="sub-time">${s.submittedAt||''}</span></td>`;
+    dates.forEach(d=>{
+      const types=(s.picks||{})[d.key]||[];
+      const chips=types.map(t=>{const lb=t==='M2'?'-2':t;return `<span class="be-chip ${t}">${lb}</span>`;}).join('');
+      r+=`<td>${chips}</td>`;
+    });
+    // one col per OT date
+    otDates.forEach(d=>{
+      const signed=(s.overtime||[]).includes(d.key);
+      r+=`<td class="ot-day">${signed?'<span class="be-chip OT">✓</span>':''}</td>`;
+    });
+    r+='</tr>';
+    return r;
+  }
+
+  function sortedGroup(grp){
+    const cfgList=(cfg.employees[grp]||[]).map(e=>e.empId);
+    return filtered
+      .filter(s=>cfgList.includes(s.empId)||s.group===grp)
+      .sort((a,b)=>{
+        const ia=cfgList.indexOf(a.empId);const ib=cfgList.indexOf(b.empId);
+        // Known employees: sort by cfg order; unknown: sort by empId string
+        if(ia>=0&&ib>=0)return ia-ib;
+        if(ia>=0)return -1;
+        if(ib>=0)return 1;
+        return a.empId.localeCompare(b.empId);
+      });
+  }
+
+  const allIds=[...(cfg.employees.fixed||[]),...(cfg.employees.rotate||[])].map(e=>e.empId);
+  const cols=dates.length+2+otDates.length;
+  let bh='';
+  [{label:'固定班',key:'fixed'},{label:'可輪班',key:'rotate'}].forEach(g=>{
+    const rows=sortedGroup(g.key);
+    if(!rows.length)return;
+    bh+=`<tr class="group-hdr"><td colspan="${cols}">— ${g.label} —</td></tr>`;
+    rows.forEach(s=>{bh+=rowHTML(s);});
+  });
+  const unmatch=filtered.filter(s=>!allIds.includes(s.empId)&&s.group!=='fixed'&&s.group!=='rotate');
+  if(unmatch.length){
+    bh+=`<tr class="group-hdr"><td colspan="${cols}">— 其他 —</td></tr>`;
+    unmatch.forEach(s=>{bh+=rowHTML(s);});
+  }
+  document.getElementById('be-body').innerHTML=bh;
+}
+
+function clearSubmissions(){
+  if(!confirm('確定要清除所有劃假紀錄嗎？'))return;
+  submissions=[];localStorage.removeItem('leaveSubmissions');renderBackend();
+}
+
+// ═══════════ RICH TEXT EDITOR ═══════════
+function edCmd(cmd){ document.execCommand(cmd,false,null); document.getElementById('cfg-notice').focus(); }
+function edColor(c){ if(c)document.execCommand('foreColor',false,c); document.getElementById('cfg-notice').focus(); }
+function edSize(s){ if(s)document.execCommand('fontSize',false,s); document.getElementById('cfg-notice').focus(); }
+function edClear(){ document.execCommand('removeFormat',false,null); document.getElementById('cfg-notice').focus(); }
+function syncNoticeToEditor(){ cfg.noticeText=document.getElementById('cfg-notice').innerHTML; }
+
+// ═══════════ LOG PAGE ═══════════
+async function renderLog(){
+  const dates=genDates(cfg.startDate);
+  const otDates=dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+  const q=(document.getElementById('log-search')||{}).value||'';
+  const filtered=[...submitLog]
+    .filter(r=>r.empId.includes(q)||r.name.includes(q))
+    .reverse();
+  document.getElementById('log-meta').textContent=`共 ${filtered.length} 筆紀錄`;
+
+  // Build dynamic header: 員編|姓名|送出時間|備註|每個假日日期(每格)|OT日期
+  let hh=`<tr>
+    <th style="position:sticky;left:0;z-index:3;background:#f5ebe0;min-width:36px;text-align:left;padding-left:8px">員編</th>
+    <th style="position:sticky;left:36px;z-index:3;background:#f5ebe0;min-width:70px;text-align:left;padding-left:6px;border-right:1.5px solid var(--border)">姓名</th>
+    <th style="min-width:130px;text-align:left;padding-left:8px;white-space:nowrap">送出時間</th>
+    <th style="min-width:55px;text-align:left;padding-left:6px">備註</th>`;
+  dates.forEach(d=>{
+    const wk=isWeekend(d)?'wk':'';
+    hh+=`<th class="${wk}">${d.m}/${d.d}<br><span style="font-size:9px;font-weight:400">${d.w}</span></th>`;
+  });
+  otDates.forEach(d=>{
+    hh+=`<th class="ot-day">${d.m}/${d.d}<br><span style="font-size:9px;font-weight:400">加班</span></th>`;
+  });
+  hh+='</tr>';
+  document.getElementById('log-head').innerHTML=hh;
+
+  if(!filtered.length){
+    const cols=4+dates.length+otDates.length;
+    document.getElementById('log-body').innerHTML=
+      `<tr><td colspan="${cols}" class="be-empty">尚無填寫紀錄</td></tr>`;
+    return;
+  }
+
+  // Find latest logId per empId
+  const latestMap={};
+  submitLog.forEach(r=>{
+    if(!latestMap[r.empId]||r.logId>latestMap[r.empId])latestMap[r.empId]=r.logId;
+  });
+
+  document.getElementById('log-body').innerHTML=filtered.map(r=>{
+    const isLatest=latestMap[r.empId]===r.logId;
+    const tag=isLatest
+      ?'<span style="background:#d8eee0;color:var(--a);font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px">最終</span>'
+      :'<span style="background:#f0e8e0;color:var(--text-muted);font-size:10px;padding:1px 6px;border-radius:10px">已覆蓋</span>';
+    const rowStyle=isLatest?'':'opacity:.5';
+    let row=`<tr style="${rowStyle}">
+      <td style="font-size:10px;font-family:'DM Mono',monospace">${r.empId}</td>
+      <td style="font-weight:600;font-size:12px">${r.name}</td>
+      <td style="font-size:10px;text-align:left;padding-left:8px;color:var(--text-muted);white-space:nowrap">${r.submittedAt||''}</td>
+      <td style="text-align:left;padding-left:6px">${tag}</td>`;
+    dates.forEach(d=>{
+      const types=(r.picks||{})[d.key]||[];
+      const chips=types.map(t=>{const lb=t==='M2'?'-2':t;return `<span class="be-chip ${t}">${lb}</span>`;}).join('');
+      row+=`<td>${chips}</td>`;
+    });
+    otDates.forEach(d=>{
+      const signed=(r.overtime||[]).includes(d.key);
+      row+=`<td class="ot-day">${signed?'<span class="be-chip OT">✓</span>':''}</td>`;
+    });
+    row+='</tr>';
+    return row;
+  }).join('');
+}
+
+function clearLog(){
+  if(!confirm('確定要清除所有填寫紀錄嗎？'))return;
+  submitLog=[];
+  localStorage.removeItem('leaveSubmitLog');
+  renderLog();
+}
+
+// ═══════════ INIT ═══════════
+buildEmployeePage();
+</script>
+</body>
+</html>
