@@ -529,7 +529,8 @@ let submitLog   = JSON.parse(localStorage.getItem('leaveSubmitLog')||'[]');
 let adminAuthed = false;
 
 // ═══ 雲端設定（填入你的 Apps Script 網址）═══
-let SCRIPT_URL = localStorage.getItem('scriptUrl') || '';
+// Apps Script 網址（已內建，同仁不需設定）
+let SCRIPT_URL = localStorage.getItem('scriptUrl') || 'https://script.google.com/macros/s/AKfycbyph1QEGUsya5ohl2YDdKIfKYe2ytmqqQz4c_IZSYMYo5PEKhYjPpGjm2-CgweMAFzywg/exec';
 
 async function cloudPost(payload){
   if(!SCRIPT_URL) return null;
