@@ -1,4 +1,7 @@
-<html lang="zh-TW"><head>
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>劃假表</title>
@@ -208,15 +211,15 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
 
 <div class="nav">
   <button class="nav-btn active" id="nav-employee" onclick="switchPage('employee')">✏️ 劃假</button>
-  <button class="nav-btn" id="nav-admin" onclick="switchPage('admin')">⚙️ 管理設定</button>
-  <button class="nav-btn" id="nav-backend" onclick="switchPage('backend')">📊 後台總覽</button>
-  <button class="nav-btn" id="nav-log" onclick="switchPage('log')">📋 填寫紀錄</button>
-  <button class="nav-btn" id="nav-logout" onclick="adminLogout()" style="flex:0.5;font-size:10px">登出</button>
+  <button class="nav-btn hidden" id="nav-admin" onclick="switchPage('admin')">⚙️ 管理設定</button>
+  <button class="nav-btn hidden" id="nav-backend" onclick="switchPage('backend')">📊 後台總覽</button>
+  <button class="nav-btn hidden" id="nav-log" onclick="switchPage('log')">📋 填寫紀錄</button>
+  <button class="nav-btn hidden" id="nav-logout" onclick="adminLogout()" style="flex:0.5;font-size:10px">登出</button>
 </div>
 
 <!-- ═══ EMPLOYEE ═══ -->
 <div id="page-employee" class="page active">
-  <div class="page-title"><h1>劃 假 表</h1><p id="submit-period-hint">如需更改可重新填寫，系統以最後一次為準</p></div>
+  <div class="page-title"><h1>劃 假 表</h1><p id="submit-period-hint"></p></div>
 
   <!-- closed banner shown when outside submit window -->
   <div class="closed-banner" id="closed-banner" style="display:none">
@@ -224,10 +227,12 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
     <p id="closed-msg"></p>
   </div>
 
-  <div id="form-body" style="display: block;">
+  <div id="form-body">
     <div class="card">
       <label>你的員編 <span class="req">*</span></label>
-      <input type="text" id="emp-id" placeholder="請輸入員編" oninput="this.value=this.value.toUpperCase();autoFillName();validateEmpId()" onblur="validateEmpId()">
+      <input type="text" id="emp-id" placeholder="請輸入員編"
+      oninput="this.value=this.value.toUpperCase();autoFillName();validateEmpId()"
+      onblur="validateEmpId()">
     <div id="empid-error" style="display:none;color:#c04a4a;font-size:11px;margin-top:5px;padding:4px 8px;
       background:#fdf0eb;border-radius:6px;border-left:3px solid #c04a4a">
       ⚠️ 查無此員編，請確認後重新輸入
@@ -241,35 +246,31 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
     <div class="notice-grid">
       <div class="notice-card">
         <h3>📋 劃假注意事項</h3>
-        <span id="notice-text-content">每人限劃假 <strong>4個 X</strong>，<strong>2個其他休假</strong><br><small>（除非已登記旅遊）</small></span>
+        <span id="notice-text-content"></span>
       </div>
       <div class="notice-card blue">
         <h3>🗓 假日加班</h3>
-        <div id="notice-weekend">7/11（六） 茜<br>7/12（日） 翔<br>7/18（六） 珊<br>7/19（日） 苹<br>7/25（六） 彥<br>7/26（日） (缺)<br>8/01（六） 翔<br>8/02（日） 葶</div>
+        <div id="notice-weekend"></div>
       </div>
     </div>
     <div class="notice-card" id="notice-tour-wrap" style="margin-bottom:14px">
       <h3>✈️ 旅遊登記</h3>
-      <div id="notice-tour"><div class="tour-item"><span class="emp-name-b">葶</span><span>7/18 – 7/20</span></div><div class="tour-item"><span class="emp-name-b">翔</span><span>7/25 – 7/28</span></div><div class="tour-item"><span class="emp-name-b">苹</span><span>7/29 – 8/2</span></div></div>
+      <div id="notice-tour"></div>
     </div>
 
     <div class="cal-label">請勾選想劃假的日期（可多選）</div>
     <div class="cal-section">
       <div class="table-wrap">
-        <table class="cal"><thead id="cal-head"><tr><th style="position:sticky;left:0;z-index:3;background:#f5ebe0;min-width:44px;border-right:1.5px solid var(--border)"></th><th class=""><span class="dn">07/06</span><span class="dl">一</span></th><th class=""><span class="dn">07/07</span><span class="dl">二</span></th><th class=""><span class="dn">07/08</span><span class="dl">三</span></th><th class=""><span class="dn">07/09</span><span class="dl">四</span></th><th class=""><span class="dn">07/10</span><span class="dl">五</span></th><th class="wk"><span class="dn">07/11</span><span class="dl">六</span><span class="ww-badge">茜</span></th><th class="wk"><span class="dn">07/12</span><span class="dl">日</span><span class="ww-badge">翔</span></th><th class=""><span class="dn">07/13</span><span class="dl">一</span></th><th class=""><span class="dn">07/14</span><span class="dl">二</span></th><th class=""><span class="dn">07/15</span><span class="dl">三</span></th><th class=""><span class="dn">07/16</span><span class="dl">四</span></th><th class=""><span class="dn">07/17</span><span class="dl">五</span></th><th class="wk"><span class="dn">07/18</span><span class="dl">六</span><span class="ww-badge">珊</span></th><th class="wk"><span class="dn">07/19</span><span class="dl">日</span><span class="ww-badge">苹</span></th><th class=""><span class="dn">07/20</span><span class="dl">一</span></th><th class=""><span class="dn">07/21</span><span class="dl">二</span></th><th class=""><span class="dn">07/22</span><span class="dl">三</span></th><th class=""><span class="dn">07/23</span><span class="dl">四</span></th><th class=""><span class="dn">07/24</span><span class="dl">五</span></th><th class="wk"><span class="dn">07/25</span><span class="dl">六</span><span class="ww-badge">彥</span></th><th class="wk"><span class="dn">07/26</span><span class="dl">日</span><span class="ww-badge">(缺)</span></th><th class=""><span class="dn">07/27</span><span class="dl">一</span></th><th class=""><span class="dn">07/28</span><span class="dl">二</span></th><th class=""><span class="dn">07/29</span><span class="dl">三</span></th><th class=""><span class="dn">07/30</span><span class="dl">四</span></th><th class=""><span class="dn">07/31</span><span class="dl">五</span></th><th class="wk"><span class="dn">08/01</span><span class="dl">六</span><span class="ww-badge">翔</span></th><th class="wk"><span class="dn">08/02</span><span class="dl">日</span><span class="ww-badge">葶</span></th></tr></thead><tbody id="cal-body"><tr class="type-row type-X"><td>X</td><td class="check-cell  " data-type="X" data-idx="0" onclick="toggle('X',0)"></td><td class="check-cell  " data-type="X" data-idx="1" onclick="toggle('X',1)"></td><td class="check-cell  " data-type="X" data-idx="2" onclick="toggle('X',2)"></td><td class="check-cell  " data-type="X" data-idx="3" onclick="toggle('X',3)"></td><td class="check-cell  " data-type="X" data-idx="4" onclick="toggle('X',4)"></td><td class="check-cell wk " data-type="X" data-idx="5" onclick="toggle('X',5)"></td><td class="check-cell wk " data-type="X" data-idx="6" onclick="toggle('X',6)"></td><td class="check-cell  " data-type="X" data-idx="7" onclick="toggle('X',7)"></td><td class="check-cell  " data-type="X" data-idx="8" onclick="toggle('X',8)"></td><td class="check-cell  " data-type="X" data-idx="9" onclick="toggle('X',9)"></td><td class="check-cell  " data-type="X" data-idx="10" onclick="toggle('X',10)"></td><td class="check-cell  " data-type="X" data-idx="11" onclick="toggle('X',11)"></td><td class="check-cell wk " data-type="X" data-idx="12" onclick="toggle('X',12)"></td><td class="check-cell wk " data-type="X" data-idx="13" onclick="toggle('X',13)"></td><td class="check-cell  " data-type="X" data-idx="14" onclick="toggle('X',14)"></td><td class="check-cell  " data-type="X" data-idx="15" onclick="toggle('X',15)"></td><td class="check-cell  " data-type="X" data-idx="16" onclick="toggle('X',16)"></td><td class="check-cell  " data-type="X" data-idx="17" onclick="toggle('X',17)"></td><td class="check-cell  " data-type="X" data-idx="18" onclick="toggle('X',18)"></td><td class="check-cell wk " data-type="X" data-idx="19" onclick="toggle('X',19)"></td><td class="check-cell wk " data-type="X" data-idx="20" onclick="toggle('X',20)"></td><td class="check-cell  " data-type="X" data-idx="21" onclick="toggle('X',21)"></td><td class="check-cell  " data-type="X" data-idx="22" onclick="toggle('X',22)"></td><td class="check-cell  " data-type="X" data-idx="23" onclick="toggle('X',23)"></td><td class="check-cell  " data-type="X" data-idx="24" onclick="toggle('X',24)"></td><td class="check-cell  " data-type="X" data-idx="25" onclick="toggle('X',25)"></td><td class="check-cell wk " data-type="X" data-idx="26" onclick="toggle('X',26)"></td><td class="check-cell wk " data-type="X" data-idx="27" onclick="toggle('X',27)"></td></tr><tr class="type-row type-AP"><td>AP</td><td class="check-cell  " data-type="AP" data-idx="0" onclick="toggle('AP',0)"></td><td class="check-cell  " data-type="AP" data-idx="1" onclick="toggle('AP',1)"></td><td class="check-cell  " data-type="AP" data-idx="2" onclick="toggle('AP',2)"></td><td class="check-cell  " data-type="AP" data-idx="3" onclick="toggle('AP',3)"></td><td class="check-cell  " data-type="AP" data-idx="4" onclick="toggle('AP',4)"></td><td class="check-cell wk " data-type="AP" data-idx="5" onclick="toggle('AP',5)"></td><td class="check-cell wk " data-type="AP" data-idx="6" onclick="toggle('AP',6)"></td><td class="check-cell  " data-type="AP" data-idx="7" onclick="toggle('AP',7)"></td><td class="check-cell  " data-type="AP" data-idx="8" onclick="toggle('AP',8)"></td><td class="check-cell  " data-type="AP" data-idx="9" onclick="toggle('AP',9)"></td><td class="check-cell  " data-type="AP" data-idx="10" onclick="toggle('AP',10)"></td><td class="check-cell  " data-type="AP" data-idx="11" onclick="toggle('AP',11)"></td><td class="check-cell wk " data-type="AP" data-idx="12" onclick="toggle('AP',12)"></td><td class="check-cell wk " data-type="AP" data-idx="13" onclick="toggle('AP',13)"></td><td class="check-cell  " data-type="AP" data-idx="14" onclick="toggle('AP',14)"></td><td class="check-cell  " data-type="AP" data-idx="15" onclick="toggle('AP',15)"></td><td class="check-cell  " data-type="AP" data-idx="16" onclick="toggle('AP',16)"></td><td class="check-cell  " data-type="AP" data-idx="17" onclick="toggle('AP',17)"></td><td class="check-cell  " data-type="AP" data-idx="18" onclick="toggle('AP',18)"></td><td class="check-cell wk " data-type="AP" data-idx="19" onclick="toggle('AP',19)"></td><td class="check-cell wk " data-type="AP" data-idx="20" onclick="toggle('AP',20)"></td><td class="check-cell  " data-type="AP" data-idx="21" onclick="toggle('AP',21)"></td><td class="check-cell  " data-type="AP" data-idx="22" onclick="toggle('AP',22)"></td><td class="check-cell  " data-type="AP" data-idx="23" onclick="toggle('AP',23)"></td><td class="check-cell  " data-type="AP" data-idx="24" onclick="toggle('AP',24)"></td><td class="check-cell  " data-type="AP" data-idx="25" onclick="toggle('AP',25)"></td><td class="check-cell wk " data-type="AP" data-idx="26" onclick="toggle('AP',26)"></td><td class="check-cell wk " data-type="AP" data-idx="27" onclick="toggle('AP',27)"></td></tr><tr class="type-row type-M2"><td>-2</td><td class="check-cell  " data-type="M2" data-idx="0" onclick="toggle('M2',0)"></td><td class="check-cell  " data-type="M2" data-idx="1" onclick="toggle('M2',1)"></td><td class="check-cell  " data-type="M2" data-idx="2" onclick="toggle('M2',2)"></td><td class="check-cell  " data-type="M2" data-idx="3" onclick="toggle('M2',3)"></td><td class="check-cell  " data-type="M2" data-idx="4" onclick="toggle('M2',4)"></td><td class="check-cell wk " data-type="M2" data-idx="5" onclick="toggle('M2',5)"></td><td class="check-cell wk " data-type="M2" data-idx="6" onclick="toggle('M2',6)"></td><td class="check-cell  " data-type="M2" data-idx="7" onclick="toggle('M2',7)"></td><td class="check-cell  " data-type="M2" data-idx="8" onclick="toggle('M2',8)"></td><td class="check-cell  " data-type="M2" data-idx="9" onclick="toggle('M2',9)"></td><td class="check-cell  " data-type="M2" data-idx="10" onclick="toggle('M2',10)"></td><td class="check-cell  " data-type="M2" data-idx="11" onclick="toggle('M2',11)"></td><td class="check-cell wk " data-type="M2" data-idx="12" onclick="toggle('M2',12)"></td><td class="check-cell wk " data-type="M2" data-idx="13" onclick="toggle('M2',13)"></td><td class="check-cell  " data-type="M2" data-idx="14" onclick="toggle('M2',14)"></td><td class="check-cell  " data-type="M2" data-idx="15" onclick="toggle('M2',15)"></td><td class="check-cell  " data-type="M2" data-idx="16" onclick="toggle('M2',16)"></td><td class="check-cell  " data-type="M2" data-idx="17" onclick="toggle('M2',17)"></td><td class="check-cell  " data-type="M2" data-idx="18" onclick="toggle('M2',18)"></td><td class="check-cell wk " data-type="M2" data-idx="19" onclick="toggle('M2',19)"></td><td class="check-cell wk " data-type="M2" data-idx="20" onclick="toggle('M2',20)"></td><td class="check-cell  " data-type="M2" data-idx="21" onclick="toggle('M2',21)"></td><td class="check-cell  " data-type="M2" data-idx="22" onclick="toggle('M2',22)"></td><td class="check-cell  " data-type="M2" data-idx="23" onclick="toggle('M2',23)"></td><td class="check-cell  " data-type="M2" data-idx="24" onclick="toggle('M2',24)"></td><td class="check-cell  " data-type="M2" data-idx="25" onclick="toggle('M2',25)"></td><td class="check-cell wk " data-type="M2" data-idx="26" onclick="toggle('M2',26)"></td><td class="check-cell wk " data-type="M2" data-idx="27" onclick="toggle('M2',27)"></td></tr><tr class="type-row type-A"><td>A</td><td class="check-cell  " data-type="A" data-idx="0" onclick="toggle('A',0)"></td><td class="check-cell  " data-type="A" data-idx="1" onclick="toggle('A',1)"></td><td class="check-cell  " data-type="A" data-idx="2" onclick="toggle('A',2)"></td><td class="check-cell  " data-type="A" data-idx="3" onclick="toggle('A',3)"></td><td class="check-cell  " data-type="A" data-idx="4" onclick="toggle('A',4)"></td><td class="check-cell wk " data-type="A" data-idx="5" onclick="toggle('A',5)"></td><td class="check-cell wk " data-type="A" data-idx="6" onclick="toggle('A',6)"></td><td class="check-cell  " data-type="A" data-idx="7" onclick="toggle('A',7)"></td><td class="check-cell  " data-type="A" data-idx="8" onclick="toggle('A',8)"></td><td class="check-cell  " data-type="A" data-idx="9" onclick="toggle('A',9)"></td><td class="check-cell  " data-type="A" data-idx="10" onclick="toggle('A',10)"></td><td class="check-cell  " data-type="A" data-idx="11" onclick="toggle('A',11)"></td><td class="check-cell wk " data-type="A" data-idx="12" onclick="toggle('A',12)"></td><td class="check-cell wk " data-type="A" data-idx="13" onclick="toggle('A',13)"></td><td class="check-cell  " data-type="A" data-idx="14" onclick="toggle('A',14)"></td><td class="check-cell  " data-type="A" data-idx="15" onclick="toggle('A',15)"></td><td class="check-cell  " data-type="A" data-idx="16" onclick="toggle('A',16)"></td><td class="check-cell  " data-type="A" data-idx="17" onclick="toggle('A',17)"></td><td class="check-cell  " data-type="A" data-idx="18" onclick="toggle('A',18)"></td><td class="check-cell wk " data-type="A" data-idx="19" onclick="toggle('A',19)"></td><td class="check-cell wk " data-type="A" data-idx="20" onclick="toggle('A',20)"></td><td class="check-cell  " data-type="A" data-idx="21" onclick="toggle('A',21)"></td><td class="check-cell  " data-type="A" data-idx="22" onclick="toggle('A',22)"></td><td class="check-cell  " data-type="A" data-idx="23" onclick="toggle('A',23)"></td><td class="check-cell  " data-type="A" data-idx="24" onclick="toggle('A',24)"></td><td class="check-cell  " data-type="A" data-idx="25" onclick="toggle('A',25)"></td><td class="check-cell wk " data-type="A" data-idx="26" onclick="toggle('A',26)"></td><td class="check-cell wk " data-type="A" data-idx="27" onclick="toggle('A',27)"></td></tr><tr class="type-row type-P"><td>P</td><td class="check-cell  " data-type="P" data-idx="0" onclick="toggle('P',0)"></td><td class="check-cell  " data-type="P" data-idx="1" onclick="toggle('P',1)"></td><td class="check-cell  " data-type="P" data-idx="2" onclick="toggle('P',2)"></td><td class="check-cell  " data-type="P" data-idx="3" onclick="toggle('P',3)"></td><td class="check-cell  " data-type="P" data-idx="4" onclick="toggle('P',4)"></td><td class="check-cell wk " data-type="P" data-idx="5" onclick="toggle('P',5)"></td><td class="check-cell wk " data-type="P" data-idx="6" onclick="toggle('P',6)"></td><td class="check-cell  " data-type="P" data-idx="7" onclick="toggle('P',7)"></td><td class="check-cell  " data-type="P" data-idx="8" onclick="toggle('P',8)"></td><td class="check-cell  " data-type="P" data-idx="9" onclick="toggle('P',9)"></td><td class="check-cell  " data-type="P" data-idx="10" onclick="toggle('P',10)"></td><td class="check-cell  " data-type="P" data-idx="11" onclick="toggle('P',11)"></td><td class="check-cell wk " data-type="P" data-idx="12" onclick="toggle('P',12)"></td><td class="check-cell wk " data-type="P" data-idx="13" onclick="toggle('P',13)"></td><td class="check-cell  " data-type="P" data-idx="14" onclick="toggle('P',14)"></td><td class="check-cell  " data-type="P" data-idx="15" onclick="toggle('P',15)"></td><td class="check-cell  " data-type="P" data-idx="16" onclick="toggle('P',16)"></td><td class="check-cell  " data-type="P" data-idx="17" onclick="toggle('P',17)"></td><td class="check-cell  " data-type="P" data-idx="18" onclick="toggle('P',18)"></td><td class="check-cell wk " data-type="P" data-idx="19" onclick="toggle('P',19)"></td><td class="check-cell wk " data-type="P" data-idx="20" onclick="toggle('P',20)"></td><td class="check-cell  " data-type="P" data-idx="21" onclick="toggle('P',21)"></td><td class="check-cell  " data-type="P" data-idx="22" onclick="toggle('P',22)"></td><td class="check-cell  " data-type="P" data-idx="23" onclick="toggle('P',23)"></td><td class="check-cell  " data-type="P" data-idx="24" onclick="toggle('P',24)"></td><td class="check-cell  " data-type="P" data-idx="25" onclick="toggle('P',25)"></td><td class="check-cell wk " data-type="P" data-idx="26" onclick="toggle('P',26)"></td><td class="check-cell wk " data-type="P" data-idx="27" onclick="toggle('P',27)"></td></tr></tbody></table>
+        <table class="cal"><thead id="cal-head"></thead><tbody id="cal-body"></tbody></table>
       </div>
-      <div class="counter-row" id="counters"><div class="cbadge X"><span class="cnt">0/4</span> X</div><div class="cbadge oth" style="margin-left:auto"><span class="cnt">0/2</span> 其他</div></div>
+      <div class="counter-row" id="counters"></div>
     </div>
 
     <div id="ot-wrap">
       <div class="overtime-label">假日自願加班（可多選）</div>
       <div class="overtime-section">
         <div class="table-wrap">
-          <table class="ot-tbl"><thead id="ot-head"><tr><th style="position:sticky;left:0;z-index:3;background:#eaf5ef;min-width:72px;border-right:1.5px solid var(--border)">假日加班</th><th class="wk">
-      <span class="dn">07/26</span>
-      <span class="dl">日</span>
-      <span class="orig-worker">(缺)</span>
-    </th></tr></thead><tbody id="ot-body"><tr><td>自願加班</td><td class="ot-cell " data-key="07/26" onclick="toggleOT('07/26')"></td></tr></tbody></table>
+          <table class="ot-tbl"><thead id="ot-head"></thead><tbody id="ot-body"></tbody></table>
         </div>
       </div>
     </div>
@@ -281,18 +282,21 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
   </div>
 
   <div style="text-align:center;margin-top:28px">
-    <span onclick="showAdminLogin()" style="font-size:10px;color:var(--border);cursor:pointer;user-select:none;letter-spacing:1px">
+    <span onclick="showAdminLogin()"
+      style="font-size:10px;color:var(--border);cursor:pointer;user-select:none;letter-spacing:1px">
       管理員登入
     </span>
   </div>
 </div>
 
 <!-- ═══ ADMIN LOGIN MODAL ═══ -->
-<div id="admin-modal" style="display: none; position: fixed; inset: 0px; background: rgba(42, 31, 23, 0.5); z-index: 150; align-items: center; justify-content: center;">
+<div id="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(42,31,23,.5);
+  z-index:150;align-items:center;justify-content:center">
   <div style="background:var(--surface);border-radius:var(--radius);padding:28px 24px;width:300px;
     border:1.5px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.18)">
     <h3 style="font-size:15px;font-weight:700;color:var(--accent-dark);letter-spacing:2px;margin-bottom:16px;text-align:center">管理員登入</h3>
-    <input type="password" id="admin-pw" placeholder="請輸入密碼" style="margin-bottom:10px" onkeydown="if(event.key==='Enter')adminLogin()">
+    <input type="password" id="admin-pw" placeholder="請輸入密碼" style="margin-bottom:10px"
+      onkeydown="if(event.key==='Enter')adminLogin()">
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeAdminModal()">取消</button>
       <button class="btn btn-admin" onclick="adminLogin()">登入</button>
@@ -316,9 +320,13 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
   <div class="sec-title">雲端連線設定</div>
   <div class="card">
     <label>Apps Script 網址</label>
-    <input type="text" id="cfg-script-url" placeholder="https://script.google.com/macros/s/…/exec" style="font-size:12px;font-family:'DM Mono',monospace">
-    <button class="btn btn-secondary" onclick="saveScriptUrl()" style="margin-top:8px;font-size:12px;letter-spacing:1px">儲存網址</button>
-    <p style="font-size:11px;color:var(--text-muted);margin-top:6px" id="cloud-status"><span style="color:var(--a)">✅ 已設定</span>　<span style="color:var(--text-muted);font-size:10px;word-break:break-all">https://script.google.com/macros/s/AKfycbyph1QEGUsya5ohl2YDdKIfKYe2ytmqqQz4c_IZSYMYo5PEKhYjPpGjm2-CgweMAFzywg/exec</span></p>
+    <input type="text" id="cfg-script-url" placeholder="https://script.google.com/macros/s/…/exec"
+      style="font-size:12px;font-family:'DM Mono',monospace">
+    <button class="btn btn-secondary" onclick="saveScriptUrl()"
+      style="margin-top:8px;font-size:12px;letter-spacing:1px">儲存網址</button>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:6px" id="cloud-status">
+      尚未設定網址
+    </p>
   </div>
 
   <div class="sec-title">開放填寫時間</div>
@@ -337,14 +345,18 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
     <label>公告內容</label>
     <!-- Toolbar -->
     <div id="editor-toolbar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-      <button type="button" onclick="edCmd('bold')" title="粗體" style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
+      <button type="button" onclick="edCmd('bold')" title="粗體"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
           font-weight:700;font-size:13px;cursor:pointer;font-family:serif">B</button>
-      <button type="button" onclick="edCmd('italic')" title="斜體" style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
+      <button type="button" onclick="edCmd('italic')" title="斜體"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
           font-style:italic;font-size:13px;cursor:pointer;font-family:serif">I</button>
-      <button type="button" onclick="edCmd('underline')" title="底線" style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
+      <button type="button" onclick="edCmd('underline')" title="底線"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);
           text-decoration:underline;font-size:13px;cursor:pointer">U</button>
       <span style="width:1px;background:var(--border);margin:0 2px;align-self:stretch"></span>
-      <select onchange="edColor(this.value);this.value=''" title="文字顏色" style="padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer">
+      <select onchange="edColor(this.value);this.value=''" title="文字顏色"
+        style="padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer">
         <option value="">🎨 顏色</option>
         <option value="#c0714a">🟠 橘</option>
         <option value="#4a7a9b">🔵 藍</option>
@@ -354,7 +366,8 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
         <option value="#7a6a9b">🟣 紫</option>
         <option value="#2a1f17">⚫ 黑</option>
       </select>
-      <select onchange="edSize(this.value);this.value=''" title="文字大小" style="padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer">
+      <select onchange="edSize(this.value);this.value=''" title="文字大小"
+        style="padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer">
         <option value="">📏 大小</option>
         <option value="1">極小</option>
         <option value="2">小</option>
@@ -363,13 +376,19 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
         <option value="5">極大</option>
       </select>
       <span style="width:1px;background:var(--border);margin:0 2px;align-self:stretch"></span>
-      <button type="button" onclick="edCmd('insertUnorderedList')" title="項目清單" style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:13px;cursor:pointer">☰</button>
-      <button type="button" onclick="edClear()" title="清除格式" style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--text-muted)">✕格式</button>
+      <button type="button" onclick="edCmd('insertUnorderedList')" title="項目清單"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:13px;cursor:pointer">☰</button>
+      <button type="button" onclick="edClear()" title="清除格式"
+        style="padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg);font-size:12px;cursor:pointer;color:var(--text-muted)">✕格式</button>
     </div>
     <!-- Editable area -->
-    <div id="cfg-notice" contenteditable="true" style="min-height:90px;border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;
+    <div id="cfg-notice" contenteditable="true"
+      style="min-height:90px;border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;
         font-size:13px;font-family:'Noto Sans TC',sans-serif;background:var(--bg);
-        color:var(--text);outline:none;line-height:1.8;cursor:text" oninput="syncNoticeToEditor()" onfocus="document.getElementById('editor-toolbar').style.borderColor='var(--accent)'">每人限劃假 <strong>4個 X</strong>，<strong>2個其他休假</strong><br><small>（除非已登記旅遊）</small></div>
+        color:var(--text);outline:none;line-height:1.8;cursor:text"
+      oninput="syncNoticeToEditor()"
+      onfocus="document.getElementById('editor-toolbar').style.borderColor='var(--accent)'">
+    </div>
     <p style="font-size:11px;color:var(--text-muted);margin-top:6px">選取文字後點工具列套用格式；Enter 換行</p>
   </div>
 
@@ -377,75 +396,9 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
   <div class="hint">員工填入員編後會自動帶入姓名；後台依固定班／可輪班分組顯示</div>
   <div class="card">
     <div style="font-size:11px;font-weight:700;color:var(--x);letter-spacing:1px;margin-bottom:6px">固定班</div>
-    <div id="emp-fixed-list">
-      <div class="emp-entry">
-        <span class="badge badge-fixed">固定</span>
-        <input type="text" placeholder="員編" value="A00453" oninput="this.value=this.value.toUpperCase();cfg.employees.fixed[0].empId=this.value">
-        <input type="text" placeholder="姓名" value="含" oninput="cfg.employees.fixed[0].name=this.value">
-        <button class="del-btn" onclick="removeEmp('fixed',0)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-fixed">固定</span>
-        <input type="text" placeholder="員編" value="A00601" oninput="this.value=this.value.toUpperCase();cfg.employees.fixed[1].empId=this.value">
-        <input type="text" placeholder="姓名" value="苹" oninput="cfg.employees.fixed[1].name=this.value">
-        <button class="del-btn" onclick="removeEmp('fixed',1)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-fixed">固定</span>
-        <input type="text" placeholder="員編" value="A01746" oninput="this.value=this.value.toUpperCase();cfg.employees.fixed[2].empId=this.value">
-        <input type="text" placeholder="姓名" value="霞" oninput="cfg.employees.fixed[2].name=this.value">
-        <button class="del-btn" onclick="removeEmp('fixed',2)">×</button>
-      </div></div>
+    <div id="emp-fixed-list"></div>
     <div style="font-size:11px;font-weight:700;color:var(--ap);letter-spacing:1px;margin:12px 0 6px">可輪班</div>
-    <div id="emp-rotate-list">
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A00934" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[0].empId=this.value">
-        <input type="text" placeholder="姓名" value="翔" oninput="cfg.employees.rotate[0].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',0)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A00970" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[1].empId=this.value">
-        <input type="text" placeholder="姓名" value="葶" oninput="cfg.employees.rotate[1].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',1)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A01279" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[2].empId=this.value">
-        <input type="text" placeholder="姓名" value="茜" oninput="cfg.employees.rotate[2].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',2)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A01908" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[3].empId=this.value">
-        <input type="text" placeholder="姓名" value="諼" oninput="cfg.employees.rotate[3].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',3)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A01924" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[4].empId=this.value">
-        <input type="text" placeholder="姓名" value="珊" oninput="cfg.employees.rotate[4].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',4)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A02267" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[5].empId=this.value">
-        <input type="text" placeholder="姓名" value="頤" oninput="cfg.employees.rotate[5].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',5)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A02426" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[6].empId=this.value">
-        <input type="text" placeholder="姓名" value="婷" oninput="cfg.employees.rotate[6].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',6)">×</button>
-      </div>
-      <div class="emp-entry">
-        <span class="badge badge-rotate">輪班</span>
-        <input type="text" placeholder="員編" value="A02468" oninput="this.value=this.value.toUpperCase();cfg.employees.rotate[7].empId=this.value">
-        <input type="text" placeholder="姓名" value="彥" oninput="cfg.employees.rotate[7].name=this.value">
-        <button class="del-btn" onclick="removeEmp('rotate',7)">×</button>
-      </div></div>
+    <div id="emp-rotate-list"></div>
     <div class="emp-add-row">
       <button onclick="addEmp('fixed')">＋ 新增固定班</button>
       <button onclick="addEmp('rotate')">＋ 新增可輪班</button>
@@ -456,7 +409,7 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
   <div class="card">
     <div class="admin-grid">
       <div class="field"><label>開始日期</label><input type="date" id="cfg-start"></div>
-      <div class="field"><label>結束日期</label><input type="date" id="cfg-end" readonly="" style="opacity:.55"></div>
+      <div class="field"><label>結束日期</label><input type="date" id="cfg-end" readonly style="opacity:.55"></div>
     </div>
     <p style="font-size:11px;color:var(--text-muted);margin-top:4px">結束日期自動為開始後 27 天（共 28 天）</p>
   </div>
@@ -466,228 +419,11 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
     輸入排定加班人員後，名字會顯示在表頭。<br>
     勾選「開放自願加班」，該日期才會出現在同仁的自願加班選單中。
   </div>
-  <div class="card" id="weekend-cfg"><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/06（一）</span>
-      <input type="checkbox" data-wkkey="07/06" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/06" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/06" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/07（二）</span>
-      <input type="checkbox" data-wkkey="07/07" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/07" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/07" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/08（三）</span>
-      <input type="checkbox" data-wkkey="07/08" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/08" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/08" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/09（四）</span>
-      <input type="checkbox" data-wkkey="07/09" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/09" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/09" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/10（五）</span>
-      <input type="checkbox" data-wkkey="07/10" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/10" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/10" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">07/11（六）</span>
-      <input type="checkbox" checked="" data-wkkey="07/11" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="茜" data-key="07/11" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/11" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">07/12（日）</span>
-      <input type="checkbox" checked="" data-wkkey="07/12" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="翔" data-key="07/12" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/12" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/13（一）</span>
-      <input type="checkbox" data-wkkey="07/13" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/13" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/13" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/14（二）</span>
-      <input type="checkbox" data-wkkey="07/14" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/14" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/14" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/15（三）</span>
-      <input type="checkbox" data-wkkey="07/15" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/15" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/15" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/16（四）</span>
-      <input type="checkbox" data-wkkey="07/16" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/16" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/16" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/17（五）</span>
-      <input type="checkbox" data-wkkey="07/17" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/17" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/17" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">07/18（六）</span>
-      <input type="checkbox" checked="" data-wkkey="07/18" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="珊" data-key="07/18" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/18" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">07/19（日）</span>
-      <input type="checkbox" checked="" data-wkkey="07/19" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="苹" data-key="07/19" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/19" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/20（一）</span>
-      <input type="checkbox" data-wkkey="07/20" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/20" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/20" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/21（二）</span>
-      <input type="checkbox" data-wkkey="07/21" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/21" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/21" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/22（三）</span>
-      <input type="checkbox" data-wkkey="07/22" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/22" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/22" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/23（四）</span>
-      <input type="checkbox" data-wkkey="07/23" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/23" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/23" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/24（五）</span>
-      <input type="checkbox" data-wkkey="07/24" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/24" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/24" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">07/25（六）</span>
-      <input type="checkbox" checked="" data-wkkey="07/25" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="彥" data-key="07/25" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/25" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">07/26（日）</span>
-      <input type="checkbox" checked="" data-wkkey="07/26" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="(缺)" data-key="07/26" class="ww-input" style="max-width:90px">
-      <input type="checkbox" checked="" data-otkey="07/26" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/27（一）</span>
-      <input type="checkbox" data-wkkey="07/27" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/27" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/27" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/28（二）</span>
-      <input type="checkbox" data-wkkey="07/28" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/28" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/28" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/29（三）</span>
-      <input type="checkbox" data-wkkey="07/29" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/29" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/29" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/30（四）</span>
-      <input type="checkbox" data-wkkey="07/30" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/30" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/30" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="">
-      <span class="dlbl" style="">07/31（五）</span>
-      <input type="checkbox" data-wkkey="07/31" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="" data-key="07/31" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="07/31" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">08/01（六）</span>
-      <input type="checkbox" checked="" data-wkkey="08/01" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="翔" data-key="08/01" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="08/01" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div><div class="wk-entry" style="background:#fff4ec">
-      <span class="dlbl" style="font-weight:700;color:var(--accent-dark)">08/02（日）</span>
-      <input type="checkbox" checked="" data-wkkey="08/02" class="wk-check">
-      <span class="ot-label" style="min-width:46px;color:var(--accent)">需加班</span>
-      <input type="text" placeholder="加班人員" value="葶" data-key="08/02" class="ww-input" style="max-width:90px">
-      <input type="checkbox" data-otkey="08/02" class="ot-check">
-      <span class="ot-label">開放自願</span>
-    </div></div>
+  <div class="card" id="weekend-cfg"></div>
 
   <div class="sec-title">旅遊登記</div>
   <div class="card">
-    <div id="tour-entries">
-    <div class="tour-entry">
-      <input type="text" placeholder="員編" value="A00970" oninput="this.value=this.value.toUpperCase();cfg.tours[0].empId=this.value" style="max-width:80px;font-family:'DM Mono',monospace;font-size:12px">
-      <input type="text" placeholder="姓名" value="葶" oninput="cfg.tours[0].name=this.value" style="max-width:64px">
-      <span style="color:var(--text-muted)">·</span>
-      <input type="text" placeholder="日期範圍（如 7/18 – 7/20）" value="7/18 – 7/20" oninput="cfg.tours[0].range=this.value">
-      <button class="del-btn" onclick="removeTour(0)">×</button>
-    </div>
-    <div class="tour-entry">
-      <input type="text" placeholder="員編" value="A00934" oninput="this.value=this.value.toUpperCase();cfg.tours[1].empId=this.value" style="max-width:80px;font-family:'DM Mono',monospace;font-size:12px">
-      <input type="text" placeholder="姓名" value="翔" oninput="cfg.tours[1].name=this.value" style="max-width:64px">
-      <span style="color:var(--text-muted)">·</span>
-      <input type="text" placeholder="日期範圍（如 7/18 – 7/20）" value="7/25 – 7/28" oninput="cfg.tours[1].range=this.value">
-      <button class="del-btn" onclick="removeTour(1)">×</button>
-    </div>
-    <div class="tour-entry">
-      <input type="text" placeholder="員編" value="A01908" oninput="this.value=this.value.toUpperCase();cfg.tours[2].empId=this.value" style="max-width:80px;font-family:'DM Mono',monospace;font-size:12px">
-      <input type="text" placeholder="姓名" value="苹" oninput="cfg.tours[2].name=this.value" style="max-width:64px">
-      <span style="color:var(--text-muted)">·</span>
-      <input type="text" placeholder="日期範圍（如 7/18 – 7/20）" value="7/29 – 8/2" oninput="cfg.tours[2].range=this.value">
-      <button class="del-btn" onclick="removeTour(2)">×</button>
-    </div></div>
+    <div id="tour-entries"></div>
     <span class="add-link" onclick="addTourEntry()">＋ 新增旅遊登記</span>
   </div>
 
@@ -714,7 +450,8 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
 <div id="page-log" class="page">
   <div class="page-title"><h1>填寫紀錄</h1><p>所有送出紀錄（含重複送出）</p></div>
   <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
-    <input type="text" id="log-search" placeholder="搜尋員編或姓名…" oninput="renderLog()" style="flex:1;border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13px;background:var(--bg);outline:none">
+    <input type="text" id="log-search" placeholder="搜尋員編或姓名…" oninput="renderLog()"
+      style="flex:1;border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-size:13px;background:var(--bg);outline:none">
     <button onclick="clearLog()" class="btn btn-danger" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0">清除紀錄</button>
   </div>
   <div class="be-meta" id="log-meta"></div>
@@ -1452,6 +1189,5 @@ function clearLog(){
 // ═══════════ INIT ═══════════
 buildEmployeePage();
 </script>
-
-
-</body></html>
+</body>
+</html>
