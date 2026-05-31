@@ -1001,8 +1001,10 @@ async function loadCloudConfig(){
     if(!cfg.submitClose)  cfg.submitClose  = '';
     localStorage.setItem('leaveCfg', JSON.stringify(cfg));
     showToast('✅ 已從雲端載入最新設定');
-    renderAdminContent();
+    // Only rebuild employee page — admin tabs must NOT appear unless logged in
     buildEmployeePage();
+    // If admin is already logged in, also refresh admin content
+    if(adminAuthed) renderAdminContent();
   }
 }
 
@@ -1186,7 +1188,29 @@ function clearLog(){
 }
 
 // ═══════════ INIT ═══════════
-buildEmployeePage();
+// 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
+async function init(){
+  if(SCRIPT_URL){
+    try{
+      const res = await cloudGet('getConfig');
+      if(res && res.ok && res.cfg){
+        cfg = res.cfg;
+        if(!cfg.employees)    cfg.employees    = DEFAULT_CFG.employees;
+        if(!cfg.adminPw)      cfg.adminPw      = '1234';
+        if(!cfg.overtimeDates)cfg.overtimeDates= {};
+        if(!cfg.workDates)    cfg.workDates    = {};
+        if(!cfg.noticeText)   cfg.noticeText   = DEFAULT_CFG.noticeText;
+        if(!cfg.submitOpen)   cfg.submitOpen   = '';
+        if(!cfg.submitClose)  cfg.submitClose  = '';
+        localStorage.setItem('leaveCfg', JSON.stringify(cfg));
+      }
+    }catch(e){ console.warn('init cloud load failed', e); }
+  }
+  // Always start on employee page, admin tabs always hidden until login
+  showAdminTabs(false);
+  buildEmployeePage();
+}
+init();
 </script>
 </body>
 </html>
