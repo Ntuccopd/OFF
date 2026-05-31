@@ -207,15 +207,15 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
 <body>
 
 <div class="nav">
-  <button class="nav-btn" id="nav-employee" onclick="switchPage('employee')">✏️ 劃假</button>
-  <button class="nav-btn active" id="nav-admin" onclick="switchPage('admin')">⚙️ 管理設定</button>
+  <button class="nav-btn active" id="nav-employee" onclick="switchPage('employee')">✏️ 劃假</button>
+  <button class="nav-btn" id="nav-admin" onclick="switchPage('admin')">⚙️ 管理設定</button>
   <button class="nav-btn" id="nav-backend" onclick="switchPage('backend')">📊 後台總覽</button>
   <button class="nav-btn" id="nav-log" onclick="switchPage('log')">📋 填寫紀錄</button>
   <button class="nav-btn" id="nav-logout" onclick="adminLogout()" style="flex:0.5;font-size:10px">登出</button>
 </div>
 
 <!-- ═══ EMPLOYEE ═══ -->
-<div id="page-employee" class="page">
+<div id="page-employee" class="page active">
   <div class="page-title"><h1>劃 假 表</h1><p id="submit-period-hint">如需更改可重新填寫，系統以最後一次為準</p></div>
 
   <!-- closed banner shown when outside submit window -->
@@ -301,7 +301,7 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
 </div>
 
 <!-- ═══ ADMIN ═══ -->
-<div id="page-admin" class="page active">
+<div id="page-admin" class="page">
   <div class="page-title"><h1>管理設定</h1><p>設定後按「儲存並套用」即生效</p></div>
 
   <div class="sec-title">修改管理員密碼</div>
