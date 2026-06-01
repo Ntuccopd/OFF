@@ -460,8 +460,9 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
     <button class="btn btn-admin" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0;margin-right:4px" onclick="exportExcel()">📥 匯出 Excel</button>
     <button class="btn btn-danger" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0" onclick="clearSubmissions()">清除紀錄</button>
   </div>
-  <div id="be-loading" style="display:none;font-size:12px;color:var(--text-muted);margin-bottom:8px">⏳ 從雲端載入中…</div>
+
   <div class="be-meta" id="be-meta"></div>
+  <div style="font-size:11px;color:var(--ap);margin-bottom:8px">💡 完整資料請至 Google 試算表查看；此處顯示本機紀錄</div>
   <div class="be-section">
     <div class="table-wrap">
       <table class="be-tbl"><thead id="be-head"></thead><tbody id="be-body"></tbody></table>
@@ -556,23 +557,11 @@ let adminAuthed = false;
 // Apps Script 網址（已內建，同仁不需設定）
 let SCRIPT_URL = localStorage.getItem('scriptUrl') || 'https://script.google.com/macros/s/AKfycbyph1QEGUsya5ohl2YDdKIfKYe2ytmqqQz4c_IZSYMYo5PEKhYjPpGjm2-CgweMAFzywg/exec';
 
-// 送資料到雲端（fire and forget，不等回應）
+// 送資料到雲端（fire and forget，完全不等，不卡頓）
 function cloudPost(payload){
   if(!SCRIPT_URL) return;
-  fetch(SCRIPT_URL, {
-    method:'POST',
-    mode:'no-cors',
-    body: JSON.stringify(payload)
-  }).catch(e=>console.warn('cloud post error',e));
-}
-
-// 讀雲端資料（只有管理員後台用，同仁不呼叫）
-async function cloudGet(action){
-  if(!SCRIPT_URL) return null;
-  try{
-    const r = await fetch(`${SCRIPT_URL}?action=${action}&t=${Date.now()}`);
-    return await r.json();
-  }catch(e){ console.warn('cloud get error',e); return null; }
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
+    .catch(()=>{});
 }
 
 const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
@@ -1013,33 +1002,10 @@ function updateCloudStatus(){
     el.textContent = '尚未設定網址';
   }
 }
-async function loadCloudConfig(){
-  showToast('⏳ 從雲端載入設定…');
-  try{
-    const res = await cloudGet('getConfig');
-    if(res && res.ok && res.cfg){
-      const c=res.cfg;
-      const hasEmps=c.employees&&
-        ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
-      if(!hasEmps)          c.employees    = cfg.employees||DEFAULT_CFG.employees;
-      if(!c.adminPw)        c.adminPw      = cfg.adminPw||'1234';
-      if(!c.overtimeDates)  c.overtimeDates= {};
-      if(!c.workDates)      c.workDates    = {};
-      if(!c.noticeText)     c.noticeText   = cfg.noticeText||DEFAULT_CFG.noticeText;
-      if(c.submitOpen===undefined)  c.submitOpen ='';
-      if(c.submitClose===undefined) c.submitClose='';
-      if(!c.startDate)      c.startDate    = cfg.startDate||DEFAULT_CFG.startDate;
-      if(!c.tours)          c.tours        = cfg.tours||DEFAULT_CFG.tours;
-      if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
-      cfg=c;
-      localStorage.setItem('leaveCfg',JSON.stringify(cfg));
-      showToast('✅ 已從雲端載入最新設定');
-      buildEmployeePage();
-      if(adminAuthed) renderAdminContent();
-    } else {
-      showToast('⚠️ 雲端無設定資料');
-    }
-  }catch(e){ showToast('⚠️ 雲端連線失敗'); }
+function loadCloudConfig(){
+  // 設定已存在 localStorage，管理員直接在此修改即可
+  showToast('✅ 設定已從本機載入');
+  renderAdminContent();
 }
 
 function showToast(msg){
@@ -1049,29 +1015,29 @@ function showToast(msg){
 }
 
 // ═══════════ BACKEND ═══════════
-async function refreshBackend(){
-  const el=document.getElementById('be-loading');
-  if(el)el.style.display='block';
-  try{
-    const res = await cloudGet('getData');
-    if(res && res.ok){
-      if(res.submissions){
-        submissions = res.submissions;
-        localStorage.setItem('leaveSubmissions',JSON.stringify(submissions));
+function refreshBackend(){
+  if(!SCRIPT_URL){showToast('⚠️ 未設定雲端網址');return;}
+  showToast('⏳ 載入中…');
+  fetch(SCRIPT_URL+'?action=getData&t='+Date.now())
+    .then(r=>r.json())
+    .then(res=>{
+      if(res&&res.ok){
+        if(res.submissions){
+          submissions=res.submissions;
+          localStorage.setItem('leaveSubmissions',JSON.stringify(submissions));
+        }
+        if(res.submitLog){
+          submitLog=res.submitLog;
+          localStorage.setItem('leaveSubmitLog',JSON.stringify(submitLog));
+        }
+        showToast('✅ 已更新');
+        renderBackend();
       }
-      if(res.submitLog){
-        submitLog = res.submitLog;
-        localStorage.setItem('leaveSubmitLog',JSON.stringify(submitLog));
-      }
-    }
-  }catch(e){
-    console.warn('refresh failed',e);
-    showToast('⚠️ 雲端連線失敗，顯示本機資料');
-  }
-  if(el)el.style.display='none';
-  renderBackend();
+    })
+    .catch(()=>showToast('⚠️ 連線失敗'));
 }
-async function renderBackend(){
+
+function renderBackend(){
   const dates=genDates(cfg.startDate);
   const last=dates[dates.length-1];
   document.getElementById('be-period').textContent=
@@ -1296,9 +1262,33 @@ function exportExcel(){
 // ═══════════ INIT ═══════════
 // 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
 function init(){
-  // 直接顯示，完全不等雲端，零卡頓
   showAdminTabs(false);
-  buildEmployeePage();
+  buildEmployeePage(); // 先顯示本機設定，不卡頓
+  // 背景拉雲端最新設定
+  if(SCRIPT_URL){
+    fetch(SCRIPT_URL+'?action=getConfig&t='+Date.now())
+      .then(r=>r.json())
+      .then(res=>{
+        if(!res||!res.ok||!res.cfg) return;
+        const c=res.cfg;
+        const hasEmps=c.employees&&
+          ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
+        if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
+        if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
+        if(!c.overtimeDates)  c.overtimeDates={};
+        if(!c.workDates)      c.workDates    ={};
+        if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
+        if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
+        if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
+        if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
+        c.submitOpen =c.submitOpen||'';
+        c.submitClose=c.submitClose||'';
+        cfg=c;
+        localStorage.setItem('leaveCfg',JSON.stringify(cfg));
+        buildEmployeePage(); // 用雲端最新設定重新渲染
+      })
+      .catch(()=>{}); // 失敗靜默，不影響頁面
+  }
 }
 init();
 </script>
