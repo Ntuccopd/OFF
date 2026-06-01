@@ -456,9 +456,11 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
   <div class="be-period" id="be-period"></div>
   <div class="be-filter">
     <input type="text" id="be-search" placeholder="搜尋員編或姓名…" oninput="renderBackend()">
+    <button class="btn btn-admin" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0;margin-right:4px" onclick="refreshBackend()">🔄 更新</button>
     <button class="btn btn-admin" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0;margin-right:4px" onclick="exportExcel()">📥 匯出 Excel</button>
     <button class="btn btn-danger" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0" onclick="clearSubmissions()">清除紀錄</button>
   </div>
+  <div id="be-loading" style="display:none;font-size:12px;color:var(--text-muted);margin-bottom:8px">⏳ 從雲端載入中…</div>
   <div class="be-meta" id="be-meta"></div>
   <div class="be-section">
     <div class="table-wrap">
@@ -1011,24 +1013,23 @@ function updateCloudStatus(){
   }
 }
 async function loadCloudConfig(){
-  const res = await cloudGet('getConfig');
-  if(res && res.ok && res.cfg){
-    cfg = res.cfg;
-    // ensure migrations
-    if(!cfg.employees)    cfg.employees    = DEFAULT_CFG.employees;
-    if(!cfg.adminPw)      cfg.adminPw      = '1234';
-    if(!cfg.overtimeDates)cfg.overtimeDates= {};
-    if(!cfg.workDates)    cfg.workDates    = {};
-    if(!cfg.noticeText)   cfg.noticeText   = DEFAULT_CFG.noticeText;
-    if(!cfg.submitOpen)   cfg.submitOpen   = '';
-    if(!cfg.submitClose)  cfg.submitClose  = '';
-    localStorage.setItem('leaveCfg', JSON.stringify(cfg));
-    showToast('✅ 已從雲端載入最新設定');
-    // Only rebuild employee page — admin tabs must NOT appear unless logged in
-    buildEmployeePage();
-    // If admin is already logged in, also refresh admin content
-    if(adminAuthed) renderAdminContent();
-  }
+  try{
+    const res = await cloudGet('getConfig');
+    if(res && res.ok && res.cfg){
+      cfg = res.cfg;
+      if(!cfg.employees)    cfg.employees    = DEFAULT_CFG.employees;
+      if(!cfg.adminPw)      cfg.adminPw      = '1234';
+      if(!cfg.overtimeDates)cfg.overtimeDates= {};
+      if(!cfg.workDates)    cfg.workDates    = {};
+      if(!cfg.noticeText)   cfg.noticeText   = DEFAULT_CFG.noticeText;
+      if(!cfg.submitOpen)   cfg.submitOpen   = '';
+      if(!cfg.submitClose)  cfg.submitClose  = '';
+      localStorage.setItem('leaveCfg', JSON.stringify(cfg));
+      showToast('✅ 已從雲端載入最新設定');
+      buildEmployeePage();
+      if(adminAuthed) renderAdminContent();
+    }
+  }catch(e){showToast('⚠️ 雲端連線失敗');}
 }
 
 function showToast(msg){
@@ -1038,15 +1039,21 @@ function showToast(msg){
 }
 
 // ═══════════ BACKEND ═══════════
-async function renderBackend(){
-  // Try to fetch fresh data from cloud
-  if(SCRIPT_URL){
+async function refreshBackend(){
+  const el=document.getElementById('be-loading');
+  if(el)el.style.display='block';
+  try{
     const res = await cloudGet('getData');
     if(res && res.ok){
       if(res.submissions) submissions = res.submissions;
       if(res.submitLog)   submitLog   = res.submitLog;
     }
-  }
+  }catch(e){console.warn('refresh failed',e);}
+  if(el)el.style.display='none';
+  renderBackend();
+}
+async function renderBackend(){
+  // Render immediately with what we have (no await — fast)
   const dates=genDates(cfg.startDate);
   const last=dates[dates.length-1];
   document.getElementById('be-period').textContent=
@@ -1270,26 +1277,28 @@ function exportExcel(){
 
 // ═══════════ INIT ═══════════
 // 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
-async function init(){
-  if(SCRIPT_URL){
-    try{
-      const res = await cloudGet('getConfig');
-      if(res && res.ok && res.cfg){
-        cfg = res.cfg;
-        if(!cfg.employees)    cfg.employees    = DEFAULT_CFG.employees;
-        if(!cfg.adminPw)      cfg.adminPw      = '1234';
-        if(!cfg.overtimeDates)cfg.overtimeDates= {};
-        if(!cfg.workDates)    cfg.workDates    = {};
-        if(!cfg.noticeText)   cfg.noticeText   = DEFAULT_CFG.noticeText;
-        if(!cfg.submitOpen)   cfg.submitOpen   = '';
-        if(!cfg.submitClose)  cfg.submitClose  = '';
-        localStorage.setItem('leaveCfg', JSON.stringify(cfg));
-      }
-    }catch(e){ console.warn('init cloud load failed', e); }
-  }
-  // Always start on employee page, admin tabs always hidden until login
+function init(){
+  // Show page immediately from localStorage (fast, no lag)
   showAdminTabs(false);
   buildEmployeePage();
+  // Then fetch latest config from cloud in background
+  if(SCRIPT_URL){
+    cloudGet('getConfig').then(res=>{
+      if(res && res.ok && res.cfg){
+        const c=res.cfg;
+        if(!c.employees)    c.employees    = DEFAULT_CFG.employees;
+        if(!c.adminPw)      c.adminPw      = '1234';
+        if(!c.overtimeDates)c.overtimeDates= {};
+        if(!c.workDates)    c.workDates    = {};
+        if(!c.noticeText)   c.noticeText   = DEFAULT_CFG.noticeText;
+        if(!c.submitOpen)   c.submitOpen   = '';
+        if(!c.submitClose)  c.submitClose  = '';
+        cfg = c;
+        localStorage.setItem('leaveCfg', JSON.stringify(cfg));
+        buildEmployeePage(); // re-render with fresh config
+      }
+    }).catch(e=>console.warn('bg config load failed',e));
+  }
 }
 init();
 </script>
