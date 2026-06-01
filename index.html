@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>劃假表</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
@@ -24,8 +24,29 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .nav-btn.active{color:#fff;border-bottom-color:#f2c89a}
 .nav-btn.hidden{display:none}
 
-.page{display:none;padding:20px 16px 64px;max-width:680px;margin:0 auto}
+.page{display:none;padding:20px 16px 64px;max-width:1100px;margin:0 auto}
 .page.active{display:block}
+@media(min-width:768px){
+  body{font-size:16px}
+  .page{padding:32px 40px 80px}
+  .page-title h1{font-size:28px}
+  .card{padding:22px 24px}
+  table.cal thead th{min-width:62px;font-size:12px}
+  table.cal thead th .dn{font-size:15px}
+  table.cal tbody tr.type-row td{min-width:62px;height:38px;font-size:13px}
+  table.cal tbody tr.type-row td:first-child{min-width:54px;font-size:13px}
+  .check-cell.sel::after{font-size:18px}
+  table.be-tbl thead th{min-width:54px;font-size:12px;padding:6px 4px}
+  table.be-tbl tbody td{height:36px;min-width:54px}
+  table.be-tbl tbody td:first-child{min-width:80px;font-size:12px}
+  table.be-tbl tbody td:nth-child(2){min-width:100px;font-size:14px}
+  .be-chip{font-size:12px;padding:2px 7px}
+  .btn{font-size:15px;padding:14px}
+  .notice-card{font-size:14px}
+  input[type=text],input[type=date],input[type=password]{font-size:15px;padding:11px 15px}
+  .cbadge{font-size:13px}.cbadge .cnt{font-size:15px}
+  .nav-btn{font-size:13px;padding:15px 8px}
+}
 
 .page-title{text-align:center;margin-bottom:22px}
 .page-title h1{font-size:22px;font-weight:700;letter-spacing:3px;color:var(--accent-dark);margin-bottom:3px}
@@ -435,6 +456,7 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
   <div class="be-period" id="be-period"></div>
   <div class="be-filter">
     <input type="text" id="be-search" placeholder="搜尋員編或姓名…" oninput="renderBackend()">
+    <button class="btn btn-admin" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0;margin-right:4px" onclick="exportExcel()">📥 匯出 Excel</button>
     <button class="btn btn-danger" style="width:auto;padding:9px 14px;font-size:12px;letter-spacing:0" onclick="clearSubmissions()">清除紀錄</button>
   </div>
   <div class="be-meta" id="be-meta"></div>
@@ -1186,6 +1208,64 @@ function clearLog(){
   submitLog=[];
   localStorage.removeItem('leaveSubmitLog');
   renderLog();
+}
+
+// ═══════════ EXPORT EXCEL ═══════════
+function exportExcel(){
+  const dates = genDates(cfg.startDate);
+  const last  = dates[dates.length-1];
+  const otDates = dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+
+  // Build header row
+  const header = ['員編','姓名','組別','送出時間'];
+  dates.forEach(d => header.push(`${d.m}/${d.d}(${d.w})`));
+  otDates.forEach(d => header.push(`加班${d.m}/${d.d}`));
+  header.push('假日自願加班');
+
+  // Sort submissions: fixed first by cfg order, then rotate
+  function sortedAll(){
+    const fixedIds=(cfg.employees.fixed||[]).map(e=>e.empId);
+    const rotateIds=(cfg.employees.rotate||[]).map(e=>e.empId);
+    const allIds=[...fixedIds,...rotateIds];
+    return [...submissions].sort((a,b)=>{
+      const ia=allIds.indexOf(a.empId); const ib=allIds.indexOf(b.empId);
+      if(ia>=0&&ib>=0)return ia-ib;
+      if(ia>=0)return -1; if(ib>=0)return 1;
+      return a.empId.localeCompare(b.empId);
+    });
+  }
+
+  const rows=[header];
+  sortedAll().forEach(s=>{
+    const grpLabel=s.group==='fixed'?'固定班':'可輪班';
+    const row=[s.empId, s.name, grpLabel, s.submittedAt||''];
+    dates.forEach(d=>{
+      const types=(s.picks||{})[d.key]||[];
+      row.push(types.map(t=>t==='M2'?'-2':t).join('/'));
+    });
+    otDates.forEach(d=>{
+      row.push((s.overtime||[]).includes(d.key)?'✓':'');
+    });
+    row.push((s.overtime||[]).map(k=>k.replace(/^0/,'')).join(', '));
+    rows.push(row);
+  });
+
+  // Convert to CSV with BOM for Excel UTF-8
+  const bom='﻿';
+  const csv=bom+rows.map(r=>r.map(v=>{
+    const s=String(v==null?'':v);
+    return s.includes(',')||s.includes('"')||s.includes('\n')
+      ? `"${s.replace(/"/g,'""')}"`
+      : s;
+  }).join(',')).join('\n');
+
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const period=`${cfg.startDate.replace(/-/g,'')}`;
+  a.href=url; a.download=`劃假表_${period}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
 // ═══════════ INIT ═══════════
