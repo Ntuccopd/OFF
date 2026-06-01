@@ -1016,14 +1016,20 @@ async function loadCloudConfig(){
   try{
     const res = await cloudGet('getConfig');
     if(res && res.ok && res.cfg){
-      cfg = res.cfg;
-      if(!cfg.employees)    cfg.employees    = DEFAULT_CFG.employees;
-      if(!cfg.adminPw)      cfg.adminPw      = '1234';
-      if(!cfg.overtimeDates)cfg.overtimeDates= {};
-      if(!cfg.workDates)    cfg.workDates    = {};
-      if(!cfg.noticeText)   cfg.noticeText   = DEFAULT_CFG.noticeText;
-      if(!cfg.submitOpen)   cfg.submitOpen   = '';
-      if(!cfg.submitClose)  cfg.submitClose  = '';
+      const c2 = res.cfg;
+      const hasEmps2 = c2.employees &&
+        ((c2.employees.fixed||[]).length>0||(c2.employees.rotate||[]).length>0);
+      if(!hasEmps2)          c2.employees    = cfg.employees||DEFAULT_CFG.employees;
+      if(!c2.adminPw)        c2.adminPw      = cfg.adminPw||'1234';
+      if(!c2.overtimeDates)  c2.overtimeDates= {};
+      if(!c2.workDates)      c2.workDates    = {};
+      if(!c2.noticeText)     c2.noticeText   = cfg.noticeText||DEFAULT_CFG.noticeText;
+      if(c2.submitOpen===undefined)  c2.submitOpen  = '';
+      if(c2.submitClose===undefined) c2.submitClose = '';
+      if(!c2.startDate)      c2.startDate    = cfg.startDate||DEFAULT_CFG.startDate;
+      if(!c2.tours)          c2.tours        = cfg.tours||DEFAULT_CFG.tours;
+      if(!c2.weekendWorkers) c2.weekendWorkers = cfg.weekendWorkers||{};
+      cfg = c2;
       localStorage.setItem('leaveCfg', JSON.stringify(cfg));
       showToast('✅ 已從雲端載入最新設定');
       buildEmployeePage();
@@ -1286,16 +1292,19 @@ function init(){
     cloudGet('getConfig').then(res=>{
       if(res && res.ok && res.cfg){
         const c=res.cfg;
-        // Only apply if cloud config has valid employee data
+        // Protect critical fields from empty/invalid cloud data
         const hasEmps = c.employees &&
           ((c.employees.fixed||[]).length>0 || (c.employees.rotate||[]).length>0);
-        if(!hasEmps) c.employees = DEFAULT_CFG.employees;
+        if(!hasEmps)        c.employees    = cfg.employees || DEFAULT_CFG.employees;
         if(!c.adminPw)      c.adminPw      = cfg.adminPw||'1234';
         if(!c.overtimeDates)c.overtimeDates= {};
         if(!c.workDates)    c.workDates    = {};
-        if(!c.noticeText)   c.noticeText   = DEFAULT_CFG.noticeText;
-        if(!c.submitOpen)   c.submitOpen   = '';
-        if(!c.submitClose)  c.submitClose  = '';
+        if(!c.noticeText)   c.noticeText   = cfg.noticeText||DEFAULT_CFG.noticeText;
+        if(c.submitOpen===undefined)  c.submitOpen  = '';
+        if(c.submitClose===undefined) c.submitClose = '';
+        if(!c.startDate)    c.startDate    = cfg.startDate||DEFAULT_CFG.startDate;
+        if(!c.tours)        c.tours        = cfg.tours||DEFAULT_CFG.tours;
+        if(!c.weekendWorkers) c.weekendWorkers = cfg.weekendWorkers||{};
         cfg = c;
         localStorage.setItem('leaveCfg', JSON.stringify(cfg));
         buildEmployeePage();
