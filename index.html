@@ -1283,34 +1283,31 @@ function exportExcel(){
 
 // ═══════════ INIT ═══════════
 // 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
-function init(){
-  // Show page immediately from localStorage (fast, no lag)
+async function init(){
   showAdminTabs(false);
-  buildEmployeePage();
-  // Then fetch latest config from cloud in background
   if(SCRIPT_URL){
-    cloudGet('getConfig').then(res=>{
+    try{
+      const res = await cloudGet('getConfig');
       if(res && res.ok && res.cfg){
         const c=res.cfg;
-        // Protect critical fields from empty/invalid cloud data
         const hasEmps = c.employees &&
           ((c.employees.fixed||[]).length>0 || (c.employees.rotate||[]).length>0);
-        if(!hasEmps)        c.employees    = cfg.employees || DEFAULT_CFG.employees;
-        if(!c.adminPw)      c.adminPw      = cfg.adminPw||'1234';
-        if(!c.overtimeDates)c.overtimeDates= {};
-        if(!c.workDates)    c.workDates    = {};
-        if(!c.noticeText)   c.noticeText   = cfg.noticeText||DEFAULT_CFG.noticeText;
+        if(!hasEmps)          c.employees     = cfg.employees||DEFAULT_CFG.employees;
+        if(!c.adminPw)        c.adminPw       = cfg.adminPw||'1234';
+        if(!c.overtimeDates)  c.overtimeDates = {};
+        if(!c.workDates)      c.workDates     = {};
+        if(!c.noticeText)     c.noticeText    = cfg.noticeText||DEFAULT_CFG.noticeText;
         if(c.submitOpen===undefined)  c.submitOpen  = '';
         if(c.submitClose===undefined) c.submitClose = '';
-        if(!c.startDate)    c.startDate    = cfg.startDate||DEFAULT_CFG.startDate;
-        if(!c.tours)        c.tours        = cfg.tours||DEFAULT_CFG.tours;
-        if(!c.weekendWorkers) c.weekendWorkers = cfg.weekendWorkers||{};
+        if(!c.startDate)      c.startDate     = cfg.startDate||DEFAULT_CFG.startDate;
+        if(!c.tours)          c.tours         = cfg.tours||DEFAULT_CFG.tours;
+        if(!c.weekendWorkers) c.weekendWorkers= cfg.weekendWorkers||{};
         cfg = c;
         localStorage.setItem('leaveCfg', JSON.stringify(cfg));
-        buildEmployeePage();
       }
-    }).catch(e=>console.warn('bg config load failed',e));
+    }catch(e){ console.warn('init cloud load failed', e); }
   }
+  buildEmployeePage();
 }
 init();
 </script>
