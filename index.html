@@ -556,49 +556,23 @@ let adminAuthed = false;
 // Apps Script 網址（已內建，同仁不需設定）
 let SCRIPT_URL = localStorage.getItem('scriptUrl') || 'https://script.google.com/macros/s/AKfycbyph1QEGUsya5ohl2YDdKIfKYe2ytmqqQz4c_IZSYMYo5PEKhYjPpGjm2-CgweMAFzywg/exec';
 
-// 用 no-cors POST 送資料（fire and forget，解決 CORS）
-async function cloudPost(payload){
-  if(!SCRIPT_URL) return null;
-  try{
-    await fetch(SCRIPT_URL, {
-      method:'POST',
-      mode:'no-cors',
-      body: JSON.stringify(payload)
-    });
-    return {ok:true};
-  }catch(e){ console.warn('cloud post error',e); return null; }
+// 送資料到雲端（fire and forget，不等回應）
+function cloudPost(payload){
+  if(!SCRIPT_URL) return;
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    mode:'no-cors',
+    body: JSON.stringify(payload)
+  }).catch(e=>console.warn('cloud post error',e));
 }
 
-// 用 script tag GET 讀資料（JSONP 方式，完全繞過 CORS）
-function cloudGet(action){
-  return new Promise((resolve)=>{
-    if(!SCRIPT_URL){resolve(null);return;}
-    const cbName='_cb'+Date.now();
-    const timeout=setTimeout(()=>{
-      delete window[cbName];
-      const s=document.getElementById(cbName);
-      if(s)s.remove();
-      console.warn('cloudGet timeout:',action);
-      resolve(null);
-    },8000);
-    window[cbName]=(data)=>{
-      clearTimeout(timeout);
-      delete window[cbName];
-      const s=document.getElementById(cbName);
-      if(s)s.remove();
-      resolve(data);
-    };
-    const s=document.createElement('script');
-    s.id=cbName;
-    s.src=`${SCRIPT_URL}?action=${action}&callback=${cbName}&t=${Date.now()}`;
-    s.onerror=()=>{
-      clearTimeout(timeout);
-      delete window[cbName];
-      s.remove();
-      resolve(null);
-    };
-    document.head.appendChild(s);
-  });
+// 讀雲端資料（只有管理員後台用，同仁不呼叫）
+async function cloudGet(action){
+  if(!SCRIPT_URL) return null;
+  try{
+    const r = await fetch(`${SCRIPT_URL}?action=${action}&t=${Date.now()}`);
+    return await r.json();
+  }catch(e){ console.warn('cloud get error',e); return null; }
 }
 
 const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
@@ -1040,29 +1014,32 @@ function updateCloudStatus(){
   }
 }
 async function loadCloudConfig(){
+  showToast('⏳ 從雲端載入設定…');
   try{
     const res = await cloudGet('getConfig');
     if(res && res.ok && res.cfg){
-      const c2 = res.cfg;
-      const hasEmps2 = c2.employees &&
-        ((c2.employees.fixed||[]).length>0||(c2.employees.rotate||[]).length>0);
-      if(!hasEmps2)          c2.employees    = cfg.employees||DEFAULT_CFG.employees;
-      if(!c2.adminPw)        c2.adminPw      = cfg.adminPw||'1234';
-      if(!c2.overtimeDates)  c2.overtimeDates= {};
-      if(!c2.workDates)      c2.workDates    = {};
-      if(!c2.noticeText)     c2.noticeText   = cfg.noticeText||DEFAULT_CFG.noticeText;
-      if(c2.submitOpen===undefined)  c2.submitOpen  = '';
-      if(c2.submitClose===undefined) c2.submitClose = '';
-      if(!c2.startDate)      c2.startDate    = cfg.startDate||DEFAULT_CFG.startDate;
-      if(!c2.tours)          c2.tours        = cfg.tours||DEFAULT_CFG.tours;
-      if(!c2.weekendWorkers) c2.weekendWorkers = cfg.weekendWorkers||{};
-      cfg = c2;
-      localStorage.setItem('leaveCfg', JSON.stringify(cfg));
+      const c=res.cfg;
+      const hasEmps=c.employees&&
+        ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
+      if(!hasEmps)          c.employees    = cfg.employees||DEFAULT_CFG.employees;
+      if(!c.adminPw)        c.adminPw      = cfg.adminPw||'1234';
+      if(!c.overtimeDates)  c.overtimeDates= {};
+      if(!c.workDates)      c.workDates    = {};
+      if(!c.noticeText)     c.noticeText   = cfg.noticeText||DEFAULT_CFG.noticeText;
+      if(c.submitOpen===undefined)  c.submitOpen ='';
+      if(c.submitClose===undefined) c.submitClose='';
+      if(!c.startDate)      c.startDate    = cfg.startDate||DEFAULT_CFG.startDate;
+      if(!c.tours)          c.tours        = cfg.tours||DEFAULT_CFG.tours;
+      if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
+      cfg=c;
+      localStorage.setItem('leaveCfg',JSON.stringify(cfg));
       showToast('✅ 已從雲端載入最新設定');
       buildEmployeePage();
       if(adminAuthed) renderAdminContent();
+    } else {
+      showToast('⚠️ 雲端無設定資料');
     }
-  }catch(e){showToast('⚠️ 雲端連線失敗');}
+  }catch(e){ showToast('⚠️ 雲端連線失敗'); }
 }
 
 function showToast(msg){
@@ -1318,46 +1295,10 @@ function exportExcel(){
 
 // ═══════════ INIT ═══════════
 // 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
-async function cloudGetWithTimeout(action, ms=5000){
-  return new Promise(async(resolve)=>{
-    const timer=setTimeout(()=>resolve(null), ms);
-    try{
-      const res=await cloudGet(action);
-      clearTimeout(timer);
-      resolve(res);
-    }catch(e){
-      clearTimeout(timer);
-      resolve(null);
-    }
-  });
-}
-
-async function init(){
+function init(){
+  // 直接顯示，完全不等雲端，零卡頓
   showAdminTabs(false);
-  buildEmployeePage(); // 先顯示，不等雲端
-  if(SCRIPT_URL){
-    try{
-      const res = await cloudGetWithTimeout('getConfig', 4000);
-      if(res && res.ok && res.cfg){
-        const c=res.cfg;
-        const hasEmps = c.employees &&
-          ((c.employees.fixed||[]).length>0 || (c.employees.rotate||[]).length>0);
-        if(!hasEmps)          c.employees     = cfg.employees||DEFAULT_CFG.employees;
-        if(!c.adminPw)        c.adminPw       = cfg.adminPw||'1234';
-        if(!c.overtimeDates)  c.overtimeDates = {};
-        if(!c.workDates)      c.workDates     = {};
-        if(!c.noticeText)     c.noticeText    = cfg.noticeText||DEFAULT_CFG.noticeText;
-        if(c.submitOpen===undefined)  c.submitOpen  = '';
-        if(c.submitClose===undefined) c.submitClose = '';
-        if(!c.startDate)      c.startDate     = cfg.startDate||DEFAULT_CFG.startDate;
-        if(!c.tours)          c.tours         = cfg.tours||DEFAULT_CFG.tours;
-        if(!c.weekendWorkers) c.weekendWorkers= cfg.weekendWorkers||{};
-        cfg = c;
-        localStorage.setItem('leaveCfg', JSON.stringify(cfg));
-        buildEmployeePage(); // 用雲端設定重新渲染
-      }
-    }catch(e){ console.warn('init cloud load failed', e); }
-  }
+  buildEmployeePage();
 }
 init();
 </script>
