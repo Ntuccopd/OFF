@@ -1051,15 +1051,23 @@ async function refreshBackend(){
   try{
     const res = await cloudGet('getData');
     if(res && res.ok){
-      if(res.submissions) submissions = res.submissions;
-      if(res.submitLog)   submitLog   = res.submitLog;
+      if(res.submissions){
+        submissions = res.submissions;
+        localStorage.setItem('leaveSubmissions',JSON.stringify(submissions));
+      }
+      if(res.submitLog){
+        submitLog = res.submitLog;
+        localStorage.setItem('leaveSubmitLog',JSON.stringify(submitLog));
+      }
     }
-  }catch(e){console.warn('refresh failed',e);}
+  }catch(e){
+    console.warn('refresh failed',e);
+    showToast('⚠️ 雲端連線失敗，顯示本機資料');
+  }
   if(el)el.style.display='none';
   renderBackend();
 }
 async function renderBackend(){
-  // Render immediately with what we have (no await — fast)
   const dates=genDates(cfg.startDate);
   const last=dates[dates.length-1];
   document.getElementById('be-period').textContent=
@@ -1283,11 +1291,26 @@ function exportExcel(){
 
 // ═══════════ INIT ═══════════
 // 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
+async function cloudGetWithTimeout(action, ms=5000){
+  return new Promise(async(resolve)=>{
+    const timer=setTimeout(()=>resolve(null), ms);
+    try{
+      const res=await cloudGet(action);
+      clearTimeout(timer);
+      resolve(res);
+    }catch(e){
+      clearTimeout(timer);
+      resolve(null);
+    }
+  });
+}
+
 async function init(){
   showAdminTabs(false);
+  buildEmployeePage(); // 先顯示，不等雲端
   if(SCRIPT_URL){
     try{
-      const res = await cloudGet('getConfig');
+      const res = await cloudGetWithTimeout('getConfig', 4000);
       if(res && res.ok && res.cfg){
         const c=res.cfg;
         const hasEmps = c.employees &&
@@ -1304,10 +1327,10 @@ async function init(){
         if(!c.weekendWorkers) c.weekendWorkers= cfg.weekendWorkers||{};
         cfg = c;
         localStorage.setItem('leaveCfg', JSON.stringify(cfg));
+        buildEmployeePage(); // 用雲端設定重新渲染
       }
     }catch(e){ console.warn('init cloud load failed', e); }
   }
-  buildEmployeePage();
 }
 init();
 </script>
