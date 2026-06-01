@@ -462,7 +462,6 @@ table.be-tbl tbody td.ot-day{background:#f2fbf5}
   </div>
 
   <div class="be-meta" id="be-meta"></div>
-  <div style="font-size:11px;color:var(--ap);margin-bottom:8px">💡 完整資料請至 Google 試算表查看；此處顯示本機紀錄</div>
   <div class="be-section">
     <div class="table-wrap">
       <table class="be-tbl"><thead id="be-head"></thead><tbody id="be-body"></tbody></table>
@@ -562,6 +561,37 @@ function cloudPost(payload){
   if(!SCRIPT_URL) return;
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
     .catch(()=>{});
+}
+
+// JSONP 讀取（完全繞過 CORS，Apps Script 已支援 callback 參數）
+function cloudGet(action){
+  return new Promise((resolve)=>{
+    if(!SCRIPT_URL){resolve(null);return;}
+    const cb='_cb'+Date.now()+'_'+Math.floor(Math.random()*9999);
+    const timer=setTimeout(()=>{
+      delete window[cb];
+      const el=document.getElementById(cb);
+      if(el)el.remove();
+      resolve(null);
+    },8000);
+    window[cb]=(data)=>{
+      clearTimeout(timer);
+      delete window[cb];
+      const el=document.getElementById(cb);
+      if(el)el.remove();
+      resolve(data);
+    };
+    const s=document.createElement('script');
+    s.id=cb;
+    s.src=`${SCRIPT_URL}?action=${action}&callback=${cb}&t=${Date.now()}`;
+    s.onerror=()=>{
+      clearTimeout(timer);
+      delete window[cb];
+      s.remove();
+      resolve(null);
+    };
+    document.head.appendChild(s);
+  });
 }
 
 const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
@@ -1015,26 +1045,26 @@ function showToast(msg){
 }
 
 // ═══════════ BACKEND ═══════════
-function refreshBackend(){
+async function refreshBackend(){
   if(!SCRIPT_URL){showToast('⚠️ 未設定雲端網址');return;}
   showToast('⏳ 載入中…');
-  fetch(SCRIPT_URL+'?action=getData&t='+Date.now())
-    .then(r=>r.json())
-    .then(res=>{
-      if(res&&res.ok){
-        if(res.submissions){
-          submissions=res.submissions;
-          localStorage.setItem('leaveSubmissions',JSON.stringify(submissions));
-        }
-        if(res.submitLog){
-          submitLog=res.submitLog;
-          localStorage.setItem('leaveSubmitLog',JSON.stringify(submitLog));
-        }
-        showToast('✅ 已更新');
-        renderBackend();
+  try{
+    const res=await cloudGet('getData');
+    if(res&&res.ok){
+      if(res.submissions){
+        submissions=res.submissions;
+        localStorage.setItem('leaveSubmissions',JSON.stringify(submissions));
       }
-    })
-    .catch(()=>showToast('⚠️ 連線失敗'));
+      if(res.submitLog){
+        submitLog=res.submitLog;
+        localStorage.setItem('leaveSubmitLog',JSON.stringify(submitLog));
+      }
+      showToast('✅ 已更新');
+      renderBackend();
+    } else {
+      showToast('⚠️ 連線失敗，請稍後再試');
+    }
+  }catch(e){ showToast('⚠️ 連線失敗'); }
 }
 
 function renderBackend(){
@@ -1266,28 +1296,25 @@ function init(){
   buildEmployeePage(); // 先顯示本機設定，不卡頓
   // 背景拉雲端最新設定
   if(SCRIPT_URL){
-    fetch(SCRIPT_URL+'?action=getConfig&t='+Date.now())
-      .then(r=>r.json())
-      .then(res=>{
-        if(!res||!res.ok||!res.cfg) return;
-        const c=res.cfg;
-        const hasEmps=c.employees&&
-          ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
-        if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
-        if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
-        if(!c.overtimeDates)  c.overtimeDates={};
-        if(!c.workDates)      c.workDates    ={};
-        if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
-        if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
-        if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
-        if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
-        c.submitOpen =c.submitOpen||'';
-        c.submitClose=c.submitClose||'';
-        cfg=c;
-        localStorage.setItem('leaveCfg',JSON.stringify(cfg));
-        buildEmployeePage(); // 用雲端最新設定重新渲染
-      })
-      .catch(()=>{}); // 失敗靜默，不影響頁面
+    cloudGet('getConfig').then(res=>{
+      if(!res||!res.ok||!res.cfg) return;
+      const c=res.cfg;
+      const hasEmps=c.employees&&
+        ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
+      if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
+      if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
+      if(!c.overtimeDates)  c.overtimeDates={};
+      if(!c.workDates)      c.workDates    ={};
+      if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
+      if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
+      if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
+      if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
+      c.submitOpen =c.submitOpen||'';
+      c.submitClose=c.submitClose||'';
+      cfg=c;
+      localStorage.setItem('leaveCfg',JSON.stringify(cfg));
+      buildEmployeePage();
+    }).catch(()=>{});
   }
 }
 init();
