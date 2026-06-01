@@ -6,105 +6,305 @@
 <title>劃假表</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
-:root{
-  --bg:#fdf6ee;--surface:#fff9f3;--border:#e8d8c8;
-  --accent:#c0714a;--accent-dark:#8a4a2f;
-  --text:#2a1f17;--text-muted:#8a7060;
-  --wkbg:#f0ddd0;--wkborder:#dfc0a8;
-  --x:#c0714a;--ap:#4a7a9b;--m2:#7a6a9b;--a:#4a9b6a;--p:#9b8a4a;
-  --admin:#3a6b5a;--radius:14px;
+
+:root {
+  --bg: #fdf6ee;
+  --surface: #fff9f3;
+  --border: #e8d8c8;
+  --accent: #c0714a;
+  --accent-dark: #8a4a2f;
+  --text: #2a1f17;
+  --text-muted: #8a7060;
+  --wkbg: #f0ddd0;
+  --wkborder: #dfc0a8;
+  --radius: 14px;
+  
+  /* 假別專屬色彩 */
+  --c-x: #c0714a;
+  --c-ap: #4a7a9b;
+  --c-m2: #7a6a9b;
+  --c-a: #4a9b6a;
+  --c-p: #9b8a4a;
+  --c-none: #f0e6dc;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-.nav{display:flex;background:var(--accent-dark);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(42,31,23,0.15);overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
-.nav-btn{flex:1;text-align:center;padding:14px 10px;color:rgba(255,249,243,0.7);font-size:15px;font-weight:500;text-decoration:none;border:none;background:none;cursor:pointer;transition:all 0.25s ease;min-width:85px}
-.nav-btn.active{color:#fff;background:rgba(255,255,255,0.15);font-weight:700;box-shadow:inset 0 -4px 0 #fff}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
 
-.container{max-width:1200px;margin:0 auto;padding:16px}
-.page{display:none}
-.page.active{display:block;animation:fadeIn 0.3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* 頂部導覽列 — 完美複製範例質感 */
+.nav {
+  display: flex;
+  background: var(--accent-dark);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(42,31,23,0.15);
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-btn {
+  flex: 1;
+  text-align: center;
+  padding: 15px 12px;
+  color: rgba(255,249,243,0.7);
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 85px;
+}
+.nav-btn.active {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  font-weight: 700;
+  box-shadow: inset 0 -4px 0 #fff;
+}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;box-shadow:0 4px 12px rgba(42,31,23,0.04)}
-.card-title{font-size:18px;font-weight:700;margin-bottom:12px;color:var(--accent-dark);display:flex;align-items:center;gap:8px}
+/* 主容器 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.25s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-.notice-box{background:#f5ede4;border-left:4px solid var(--accent);padding:12px;border-radius:6px;font-size:14px;line-height:1.6;color:#5a4535;white-space:pre-wrap;margin-bottom:16px}
+/* 卡片元件 */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 16px rgba(42,31,23,0.04);
+}
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--accent-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:14px;font-weight:700;margin-bottom:6px;color:var(--text)}
-.select-custom, .input-custom{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:15px;color:var(--text);outline:none;transition:border 0.2s}
-.select-custom:focus, .input-custom:focus{border-color:var(--accent)}
+/* 公告欄 */
+.notice-box {
+  background: #f5ede4;
+  border-left: 4px solid var(--accent);
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #5a4535;
+  white-space: pre-wrap;
+}
 
-.grid-container{width:100%;overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
-.grid-table{width:100%;border-collapse:collapse;font-size:14px;text-align:center;min-width:600px}
-.grid-table th, .grid-table td{padding:10px 6px;border:1px solid var(--border);min-width:44px}
-.grid-table th{background:#f7ede2;font-weight:700;color:var(--text)}
-.grid-table th.wk{background:var(--wkbg);color:var(--accent-dark)}
-.grid-table td.wk{background:#fffbf7}
-.grid-table tr:hover td{background-color:rgba(192,113,74,0.03)}
+/* 表單群組 */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.form-group { margin-bottom: 12px; }
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.select-custom, .input-custom {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.select-custom:focus, .input-custom:focus { border-color: var(--accent); }
 
-.btn-pick{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:14px;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all 0.15s ease;display:inline-flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none}
-.btn-pick:active{transform:scale(0.92)}
-.btn-pick.state-X{background:var(--x);color:#fff;border-color:var(--x)}
-.btn-pick.state-AP{background:var(--ap);color:#fff;border-color:var(--ap)}
-.btn-pick.state-M2{background:var(--m2);color:#fff;border-color:var(--m2)}
-.btn-pick.state-A{background:var(--a);color:#fff;border-color:var(--a)}
-.btn-pick.state-P{background:var(--p);color:#fff;border-color:var(--p)}
+/* 表格外部包裝 — 完美橫向滾動與 RWD */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: center;
+  min-width: 750px;
+}
+.grid-table th, .grid-table td {
+  padding: 10px 4px;
+  border: 1px solid var(--border);
+  min-width: 46px;
+}
+.grid-table th { background: #fbf5ee; font-weight: 700; color: var(--text); }
+.grid-table th.wk { background: var(--wkbg); color: var(--accent-dark); }
+.grid-table td.wk { background: #fffcf9; }
 
-.ot-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:8px}
-.ot-item{border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;background:#fff;cursor:pointer;user-select:none;-webkit-user-select:none;transition:all 0.15s}
-.ot-item.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
-.ot-item.disabled{background:#f0e6dc;color:#bca89a;cursor:not-allowed;border-color:#e4d4c4;opacity:0.6}
+/* 範例標誌性的圓圈假別按鈕 */
+.cbadge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.cbadge:active { transform: scale(0.9); }
+.cbadge.s-X { background: var(--c-x); color: #fff; border-color: var(--c-x); }
+.cbadge.s-AP { background: var(--c-ap); color: #fff; border-color: var(--c-ap); }
+.cbadge.s-M2 { background: var(--c-m2); color: #fff; border-color: var(--c-m2); }
+.cbadge.s-A { background: var(--c-a); color: #fff; border-color: var(--c-a); }
+.cbadge.s-P { background: var(--c-p); color: #fff; border-color: var(--c-p); }
 
-.legend-box{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0;padding:10px;background:#fcf8f4;border-radius:8px;border:1px solid var(--border)}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
-.legend-badge{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+/* 圖例 */
+.legend-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: #fcf8f4;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+.legend-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
 
-.btn-main{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:background 0.2s,transform 0.1s;box-shadow:0 4px 10px rgba(192,113,74,0.25);display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-main:hover{background:var(--accent-dark)}
-.btn-main:active{transform:scale(0.98)}
-.btn-main:disabled{background:#d0beaf;box-shadow:none;cursor:not-allowed}
+/* 加班意願區塊 */
+.ot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.ot-node {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+  transition: all 0.15s;
+}
+.ot-node.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+.ot-node.disabled { background: #f0e6dc; color: #bca89a; cursor: not-allowed; opacity: 0.6; border-color: #e4d4c4; }
 
-.count-summary{font-size:13px;margin-top:8px;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap;background:#fbf5ee;padding:8px 12px;border-radius:6px}
+/* 主要提交大按鈕 */
+.btn-main {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(192,113,74,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-main:hover { background: var(--accent-dark); }
+.btn-main:active { transform: scale(0.98); }
+.btn-main:disabled { background: #d0beaf; box-shadow: none; cursor: not-allowed; }
 
-.admin-tabs{display:flex;gap:8px;margin-bottom:14px;border-bottom:2px solid var(--border);padding-bottom:8px;overflow-x:auto}
-.admin-tab-btn{padding:8px 14px;border:none;background:none;color:var(--text-muted);font-size:14px;font-weight:700;cursor:pointer;border-radius:6px;transition:all 0.2s}
-.admin-tab-btn.active{background:var(--admin);color:#fff}
-.admin-sub-page{display:none}
-.admin-sub-page.active{display:block}
+/* 計數總計欄 */
+.summary-bar {
+  font-size: 13px;
+  margin-top: 10px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #fbf5ee;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
 
-.textarea-custom{width:100%;height:100px;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px;resize:vertical;outline:none}
-.textarea-custom:focus{border-color:var(--admin)}
+/* 同步橫幅 */
+.sync-banner {
+  background: #eaf2f0;
+  border: 1px solid #b2d3c9;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sync-title { font-size: 14px; color: #3a6b5a; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.btn-sync { padding: 6px 12px; background: #3a6b5a; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.btn-sync:hover { background: #284d41; }
 
-.be-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
-.be-table th, .be-table td{padding:10px 8px;border:1px solid var(--border);text-align:center}
-.be-table th{background:#e2ece9;color:var(--admin);font-weight:700}
-.be-table tr:nth-child(even){background:#f7faf9}
-.be-empty{color:var(--text-muted);padding:24px;text-align:center;font-style:italic}
+/* 後台表格 */
+.be-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.be-table th, .be-table td { padding: 10px 8px; border: 1px solid var(--border); text-align: center; }
+.be-table th { background: #e2ece9; color: #3a6b5a; font-weight: 700; }
+.be-table tr:nth-child(even) { background: #f7faf9; }
+.be-empty { color: var(--text-muted); padding: 30px; text-align: center; font-style: italic; }
 
-.sync-banner{background:#eaf2f0;border:1px solid #b2d3c9;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.sync-title{font-size:13px;color:var(--admin);font-weight:700;display:flex;align-items:center;gap:6px}
-.btn-sync{padding:6px 12px;background:var(--admin);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s}
-.btn-sync:hover{background:#284d41}
-.btn-sync:active{transform:scale(0.95)}
+/* 後台管理頁籤 */
+.admin-tabs { display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+.admin-tab-btn { padding: 8px 14px; border: none; background: none; color: var(--text-muted); font-size: 14px; font-weight: 700; cursor: pointer; border-radius: 6px; }
+.admin-tab-btn.active { background: #3a6b5a; color: #fff; }
+.admin-sub-page { display: none; }
+.admin-sub-page.active { display: block; }
+.textarea-custom { width: 100%; height: 100px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; resize: vertical; outline: none; }
 
-@media(max-width:600px){
-  .container{padding:10px}
-  .card{padding:12px;margin-bottom:12px;border-radius:10px}
-  .nav-btn{padding:12px 6px;font-size:14px;min-width:75px}
-  .btn-main{padding:12px;font-size:15px}
-  .grid-table th, .grid-table td{padding:8px 4px;font-size:13px}
-  .btn-pick{width:32px;height:32px;font-size:13px}
-  .ot-container{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
-  .ot-item{padding:6px;font-size:13px}
+@media(max-width: 600px) {
+  .container { padding: 10px; }
+  .card { padding: 14px; margin-bottom: 12px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .nav-btn { padding: 12px 8px; font-size: 14px; min-width: 75px; }
+  .cbadge { width: 33px; height: 33px; font-size: 13px; }
+  .grid-table th, .grid-table td { padding: 8px 2px; font-size: 13px; min-width: 40px; }
 }
 </style>
 </head>
 <body>
 
 <div class="nav">
-  <button class="nav-btn active" id="nav-form" onclick="switchPage('form')">✍️ 線上劃假</button>
+  <button class="nav-btn active" id="nav-form" onclick="switchPage('form')">✏️ 線上劃假</button>
   <button class="nav-btn" id="nav-backend" onclick="switchPage('backend')">📊 後台總覽</button>
   <button class="nav-btn" id="nav-log" onclick="switchPage('log')">📋 填寫紀錄</button>
   <button class="nav-btn" id="nav-admin" onclick="switchPage('admin')">⚙️ 系統設定</button>
@@ -115,12 +315,12 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   <div id="page-form" class="page active">
     <div class="card">
       <div class="card-title">📢 劃假注意事項</div>
-      <div id="form-notice" class="notice-box">讀取中...</div>
+      <div id="form-notice" class="notice-box">正在即時連線雲端資料...</div>
     </div>
     
     <div class="card">
       <div class="card-title">👤 填寫人員資訊</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-row">
         <div class="form-group">
           <label>組別</label>
           <select id="user-group" class="select-custom" onchange="onGroupChange()">
@@ -135,22 +335,22 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
           </select>
         </div>
       </div>
-      <div id="user-emp-id" style="font-size:13px;color:var(--text-muted);margin-top:-4px;font-family:monospace"></div>
+      <div id="user-emp-id" style="font-size:13px;color:var(--text-muted);margin-top:2px;font-family:monospace;padding-left:2px"></div>
     </div>
 
     <div class="card" id="calendar-card" style="display:none">
       <div class="card-title">📅 選擇指定假期</div>
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">點擊日期方格可切換假別</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px">點擊日期圓圈可循環切換假別</p>
       
       <div class="legend-box">
-        <div class="legend-item"><span class="legend-badge state-X" style="background:var(--x)">X</span> <span>例假/休假</span></div>
-        <div class="legend-item"><span class="legend-badge state-AP" style="background:var(--ap)">AP</span> <span>特休/年假</span></div>
-        <div class="legend-item"><span class="legend-badge state-M2" style="background:var(--m2)">M2</span> <span>會議減班</span></div>
-        <div class="legend-item"><span class="legend-badge state-A" style="background:var(--a)">A</span> <span>AM 假</span></div>
-        <div class="legend-item"><span class="legend-badge state-P" style="background:var(--p)">P</span> <span>PM 假</span></div>
+        <div class="legend-item"><span class="legend-circle" style="background:var(--c-x)">X</span><span>例休假</span></div>
+        <div class="legend-item"><span class="legend-circle" style="background:var(--c-ap)">AP</span><span>特休</span></div>
+        <div class="legend-item"><span class="legend-circle" style="background:var(--c-m2)">M2</span><span>會議減班</span></div>
+        <div class="legend-item"><span class="legend-circle" style="background:var(--c-a)">A</span><span>AM假</span></div>
+        <div class="legend-item"><span class="legend-circle" style="background:var(--c-p)">P</span><span>PM假</span></div>
       </div>
 
-      <div class="grid-container">
+      <div class="table-wrap">
         <table class="grid-table">
           <thead>
             <tr id="grid-header-wk"></tr>
@@ -162,13 +362,13 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
         </table>
       </div>
 
-      <div class="count-summary" id="count-summary">已選擇：無</div>
+      <div class="summary-bar" id="count-summary">已選擇：無</div>
     </div>
 
     <div class="card" id="ot-card" style="display:none">
       <div class="card-title">💪 自願加班調查 (可多選)</div>
-      <p style="font-size:13px;color:var(--text-muted)">若當天人力不足，您願意出來加班的日期：</p>
-      <div class="ot-container" id="ot-box"></div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:4px">若當天人力不足，您願意出來加班的日期：</p>
+      <div class="ot-grid" id="ot-box"></div>
     </div>
 
     <button id="btn-submit" class="btn-main" onclick="doSubmitForm()" disabled>確認無誤，送出劃假</button>
@@ -181,8 +381,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     </div>
     
     <div class="card" style="margin-bottom:12px">
-      <div class="card-title">⚙️ 快速匯出</div>
-      <button class="btn-sync" style="background:var(--accent)" onclick="exportToCSV()">📥 下載劃假紀錄表 (CSV)</button>
+      <button class="btn-sync" style="background:var(--accent);width:100%;justify-content:center;padding:12px" onclick="exportToCSV()">📥 下載當期劃假紀錄表 (CSV)</button>
     </div>
 
     <div class="card" style="overflow-x:auto;padding:12px">
@@ -234,7 +433,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
         <label>請輸入管理密碼</label>
         <input type="password" id="admin-pw-input" class="input-custom" placeholder="預設為 1234">
       </div>
-      <button class="btn-main" style="background:var(--admin)" onclick="checkAdminAuth()">驗證登入</button>
+      <button class="btn-main" style="background:#3a6b5a" onclick="checkAdminAuth()">驗證登入</button>
     </div>
 
     <div id="admin-main-box" style="display:none">
@@ -260,9 +459,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
         </div>
 
         <div class="card">
-          <div class="card-title">📅 当期 特殊日期設定 (點擊切換)</div>
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">橘色=國定假日/不開放劃假 | 綠色=週末補上班/開放劃假</p>
-          <div class="grid-container">
+          <div class="card-title">📅 當期特殊日期設定 (點擊切換)</div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">橘色=不開放劃假(國定假) | 綠色=開放劃假(補班日)</p>
+          <div class="table-wrap">
             <table class="grid-table">
               <thead>
                 <tr id="cfg-grid-wk"></tr>
@@ -274,28 +473,23 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
             </table>
           </div>
         </div>
-
-        <button class="btn-main" style="background:var(--admin);margin-bottom:20px" id="btn-save-cfg" onclick="doSaveConfig()">儲存設定並同步至雲端</button>
+        <button class="btn-main" style="background:#3a6b5a;margin-bottom:20px" id="btn-save-cfg-1" onclick="doSaveConfig()">儲存設定並同步至雲端</button>
       </div>
 
       <div id="asub-emps" class="admin-sub-page">
         <div class="card">
           <div class="card-title">👥 人員名單原始檔 (JSON 格式)</div>
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">修改時請務必確保結構、逗號與雙引號正確。格式：{"id":"員編","name":"姓名"}</p>
-          
           <div class="form-group">
             <label style="color:var(--accent-dark)">● 固定班同仁名單</label>
             <textarea id="cfg-emps-fixed" class="textarea-custom" style="height:120px;font-family:monospace;font-size:12px"></textarea>
           </div>
-          
-          <div class="form-group" style="margin-top:16px">
+          <div class="form-group" style="margin-top:14px">
             <label style="color:var(--accent-dark)">● 輪班組同仁名單</label>
             <textarea id="cfg-emps-rotate" class="textarea-custom" style="height:120px;font-family:monospace;font-size:12px"></textarea>
           </div>
         </div>
-        <button class="btn-main" style="background:var(--admin)" onclick="doSaveConfig()">儲存設定並同步至雲端</button>
+        <button class="btn-main" style="background:#3a6b5a" id="btn-save-cfg-2" onclick="doSaveConfig()">儲存設定並同步至雲端</button>
       </div>
-
     </div>
   </div>
 
@@ -310,12 +504,8 @@ const DEFAULT_CFG = {
   noticeText: "1. 請於截止日前完成劃假。\n2. 特休(AP)請依各組剩餘額度酌量排定。\n3. 送出後如需重劃，在截止日前再次送出即可覆蓋舊紀錄。",
   adminPw: "1234",
   employees: {
-    fixed: [
-      {id:"1001",name:"同仁A"},{id:"1002",name:"同仁B"}
-    ],
-    rotate: [
-      {id:"2001",name:"同仁C"},{id:"2002",name:"同仁D"}
-    ]
+    fixed: [{id:"1001",name:"同仁A"},{id:"1002",name:"同仁B"}],
+    rotate: [{id:"2001",name:"同仁C"},{id:"2002",name:"同仁D"}]
   },
   overtimeDates: {}, 
   workDates: {}       
@@ -350,7 +540,7 @@ function cloudGet(action) {
 }
 
 function cloudPost(action, payload) {
-  if (!SCRIPT_URL) return Promise.resolve({ok:false, error:'無 API URL'});
+  if (!SCRIPT_URL) return Promise.resolve({ok:false, error:'無 API'});
   const body = Object.assign({ action: action }, payload);
   return fetch(SCRIPT_URL, {
     method: 'POST',
@@ -361,7 +551,7 @@ function cloudPost(action, payload) {
     .catch(err => ({ ok: false, error: err.toString() }));
 }
 
-// ═══════════ 分頁切換邏輯（核心修正：杜絕跨裝置不同步） ═══════════
+// ═══════════ 分頁切換邏輯 ═══════════
 function switchPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -371,7 +561,6 @@ function switchPage(pageId) {
   if (targetPage) targetPage.classList.add('active');
   if (targetBtn) targetBtn.classList.add('active');
 
-  // 只要管理員切換到後台或日誌，不問原因，直接強制跟 Google 試算表同步最新資料
   if (pageId === 'backend' || pageId === 'log') {
     if (SCRIPT_URL) {
       cloudGet('getData').then(res => {
@@ -381,10 +570,9 @@ function switchPage(pageId) {
           if (pageId === 'backend') renderBackendTable();
           else renderLogTable();
         }
-      }).catch(err => console.error("即時抓取雲端失敗：", err));
+      }).catch(err => console.error(err));
     }
-  } 
-  else if (pageId === 'admin') {
+  } else if (pageId === 'admin') {
     initAdminPage();
   }
 }
@@ -400,19 +588,17 @@ function forceRefreshData(btn) {
       cloudData.submitLog = res.submitLog || [];
       renderBackendTable();
       renderLogTable();
-      alert('✅ 雲端資料庫同步完成！');
+      alert('✅ 雲端資料同步完成！');
     } else {
-      alert('❌ 同步失敗：' + (res?res.error:'未知錯誤'));
+      alert('❌ 同步失敗');
     }
-  }).catch(err => {
-    alert('❌ 網路連線失敗：' + err.toString());
-  }).finally(() => {
+  }).catch(err => alert(err.toString())).finally(() => {
     btn.innerText = oldText;
     btn.disabled = false;
   });
 }
 
-// ═══════════ 前端表單填寫頁面邏輯 ═══════════
+// ═══════════ 前端劃假表單邏輯 ═══════════
 function buildEmployeePage() {
   document.getElementById('form-notice').innerText = cfg.noticeText || '';
   onGroupChange();
@@ -451,8 +637,7 @@ function onUserChange() {
     return;
   }
 
-  const empId = opt.dataset.id;
-  empIdEl.innerText = `員工編號：${empId}`;
+  empIdEl.innerText = `員工編號：${opt.dataset.id}`;
   calCard.style.display = 'block';
   otCard.style.display = 'block';
   btnSub.disabled = false;
@@ -460,13 +645,6 @@ function onUserChange() {
   userPicks = {};
   userOvertime = [];
   
-  try {
-    const localSaved = localStorage.getItem(`vac_picks_${empId}`);
-    if (localSaved) userPicks = JSON.parse(localSaved);
-    const localOt = localStorage.getItem(`vac_ot_${empId}`);
-    if (localOt) userOvertime = JSON.parse(localOt);
-  } catch(e){}
-
   resetGridUiValues();
   buildOtContainer();
   updateCountSummary();
@@ -513,9 +691,10 @@ function buildPeriodGrid() {
     const td = document.createElement('td');
     if(isHoliday) td.className = 'wk';
     
+    // 完美採用範例網址的圓圈按鈕 (cbadge)
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'btn-pick';
+    btn.className = 'cbadge';
     btn.id = `pk-${idx}`;
     btn.innerText = '';
     btn.onclick = () => toggleState(idx, d.dateStr);
@@ -531,27 +710,16 @@ function toggleState(idx, dateStr) {
   if(nextIdx >= STATES.length) nextIdx = 0;
   const nextState = STATES[nextIdx];
 
-  if(nextState) {
-    userPicks[dateStr] = nextState;
-  } else {
-    delete userPicks[dateStr];
-  }
+  if(nextState) userPicks[dateStr] = nextState;
+  else delete userPicks[dateStr];
 
   const otItem = document.getElementById(`ot-item-${idx}`);
   if(nextState !== '') {
-    if(otItem) {
-      otItem.classList.add('disabled');
-      otItem.classList.remove('active');
-    }
+    if(otItem) { otItem.classList.add('disabled'); otItem.classList.remove('active'); }
     userOvertime = userOvertime.filter(v => v !== dateStr);
   } else {
     if(otItem) otItem.classList.remove('disabled');
   }
-
-  const nameSelect = document.getElementById('user-name');
-  const empId = nameSelect.options[nameSelect.selectedIndex].dataset.id;
-  localStorage.setItem(`vac_picks_${empId}`, JSON.stringify(userPicks));
-  localStorage.setItem(`vac_ot_${empId}`, JSON.stringify(userOvertime));
 
   refreshBtnUi(idx, nextState);
   updateCountSummary();
@@ -560,16 +728,15 @@ function toggleState(idx, dateStr) {
 function refreshBtnUi(idx, state) {
   const btn = document.getElementById(`pk-${idx}`);
   if(!btn) return;
-  btn.className = 'btn-pick';
-  if(state) btn.classList.add(`state-${state}`);
+  btn.className = 'cbadge';
+  if(state) btn.classList.add(`s-${state}`);
   btn.innerText = state;
 }
 
 function resetGridUiValues() {
   const dates = getPeriodDates();
   dates.forEach((d, idx) => {
-    const val = userPicks[d.dateStr] || '';
-    refreshBtnUi(idx, val);
+    refreshBtnUi(idx, userPicks[d.dateStr] || '');
   });
 }
 
@@ -577,7 +744,6 @@ function updateCountSummary() {
   const counts = {};
   STATES.forEach(s => { if(s) counts[s] = 0; });
   Object.values(userPicks).forEach(v => { if(counts[v]!=null) counts[v]++; });
-
   const txt = Object.keys(counts).map(k => `<b>${k}</b>: ${counts[k]}天`).join(' | ');
   document.getElementById('count-summary').innerHTML = '目前統計結果 — ' + (txt || '無劃假');
 }
@@ -585,24 +751,17 @@ function updateCountSummary() {
 function buildOtContainer() {
   const box = document.getElementById('ot-box');
   box.innerHTML = '';
-  const dates = getPeriodDates();
-
-  dates.forEach((d, idx) => {
+  getPeriodDates().forEach((d, idx) => {
     const item = document.createElement('div');
-    item.className = 'ot-item';
+    item.className = 'ot-node';
     item.id = `ot-item-${idx}`;
-    
     item.innerText = `${d.dateStr.split('-')[1]}/${d.dayNum} (${d.wkName})`;
 
-    const isPicked = userPicks[d.dateStr] != null;
-    if(isPicked) item.classList.add('disabled');
-
-    const isOtActive = userOvertime.includes(d.dateStr);
-    if(!isPicked && isOtActive) item.classList.add('active');
+    if(userPicks[d.dateStr] != null) item.classList.add('disabled');
+    if(userPicks[d.dateStr] == null && userOvertime.includes(d.dateStr)) item.classList.add('active');
 
     item.onclick = () => {
       if(userPicks[d.dateStr] != null) return; 
-      
       if(userOvertime.includes(d.dateStr)) {
         userOvertime = userOvertime.filter(v => v !== d.dateStr);
         item.classList.remove('active');
@@ -610,11 +769,7 @@ function buildOtContainer() {
         userOvertime.push(d.dateStr);
         item.classList.add('active');
       }
-      const nameSelect = document.getElementById('user-name');
-      const empId = nameSelect.options[nameSelect.selectedIndex].dataset.id;
-      localStorage.setItem(`vac_ot_${empId}`, JSON.stringify(userOvertime));
     };
-
     box.appendChild(item);
   });
 }
@@ -625,62 +780,48 @@ function doSubmitForm() {
   const opt = nameSelect.options[nameSelect.selectedIndex];
   if(!opt || !opt.value) return alert('請先選擇您的姓名！');
 
-  const empId = opt.dataset.id;
-  const name = opt.value;
   const btn = document.getElementById('btn-submit');
+  if(!confirm(`確認要送出 ${opt.value} 的劃假資料嗎？`)) return;
 
-  if(!confirm(`確認要送出 ${name} 的劃假資料嗎？\n(重複送出將會自動覆蓋舊紀錄)`)) return;
-
-  btn.innerText = '正在安全上傳雲端...';
+  btn.innerText = '正在上傳雲端...';
   btn.disabled = true;
 
-  const payload = {
-    empId: empId, name: name, group: group,
+  cloudPost('submit', {
+    empId: opt.dataset.id, name: opt.value, group: group,
     picks: userPicks, overtime: userOvertime
-  };
-
-  cloudPost('submit', payload).then(res => {
-    alert('🎉 劃假資料已成功寫入試算表！');
+  }).then(() => {
+    alert('🎉 劃假資料已成功送出！');
   }).catch(err => {
-    alert('⚠️ 雖然連線逾時，但資料通常已成功寫入！請稍後到後台確認。\n錯誤訊息: ' + err.toString());
+    alert('⚠️ 連線逾時，但資料應已上傳。請稍後至後台總覽核對！\n' + err.toString());
   }).finally(() => {
     btn.innerText = '確認無誤，送出劃假';
     btn.disabled = false;
   });
 }
 
-// ═══════════ 後台總覽與流水日誌渲染 ═══════════
+// ═══════════ 後台總覽與日誌渲染 ═══════════
 function renderBackendTable() {
   const body = document.getElementById('be-body');
   body.innerHTML = '';
   const subs = cloudData.submissions || [];
-
   if(!subs.length) {
     body.innerHTML = `<tr><td colspan="5" class="be-empty">目前試算表中無任何有效劃假紀錄</td></tr>`;
     return;
   }
-
   let html = '';
   subs.forEach(s => {
-    const groupName = s.group === 'fixed' ? '固定班' : '輪班組';
     const counts = {};
     Object.values(s.picks || {}).forEach(v => { counts[v] = (counts[v] || 0) + 1; });
     let pTxt = Object.keys(counts).map(k => `${k}:${counts[k]}天`).join(', ') || '無';
-    
-    let otTxt = '';
-    if(s.overtime && s.overtime.length) {
-      otTxt = ` <span style="color:var(--admin);font-weight:bold">| 自願加班: ${s.overtime.map(d=>d.split('-')[2]||d).join(',')}日</span>`;
-    }
+    let otTxt = (s.overtime && s.overtime.length) ? ` <span style="color:#3a6b5a;font-weight:bold">| 自願加班: ${s.overtime.map(d=>d.split('-')[2]||d).join(',')}日</span>` : '';
 
-    html += `
-      <tr>
-        <td>${groupName}</td>
-        <td style="font-family:monospace">${s.empId}</td>
-        <td style="font-weight:bold">${s.name}</td>
-        <td style="color:var(--text-muted)">${s.submittedAt}</td>
-        <td style="text-align:left;padding-left:12px">劃假 [ ${pTxt} ]${otTxt}</td>
-      </tr>
-    `;
+    html += `<tr>
+      <td>${s.group === 'fixed' ? '固定班' : '輪班組'}</td>
+      <td style="font-family:monospace">${s.empId}</td>
+      <td style="font-weight:bold">${s.name}</td>
+      <td style="color:var(--text-muted)">${s.submittedAt}</td>
+      <td style="text-align:left;padding-left:12px">劃假 [ ${pTxt} ]${otTxt}</td>
+    </tr>`;
   });
   body.innerHTML = html;
 }
@@ -689,22 +830,18 @@ function renderLogTable() {
   const body = document.getElementById('log-body');
   body.innerHTML = '';
   const logs = cloudData.submitLog || [];
-
   if(!logs.length) {
     body.innerHTML = `<tr><td colspan="4" class="be-empty">目前尚無任何送出紀錄日誌</td></tr>`;
     return;
   }
-
   let html = '';
   [...logs].reverse().forEach(l => {
-    html += `
-      <tr>
-        <td style="padding:6px 12px;text-align:left;color:var(--text-muted);font-family:monospace">${l.submittedAt || ''}</td>
-        <td style="padding:6px 12px;text-align:left;font-weight:bold">${l.empId || ''}</td>
-        <td style="padding:6px 12px;text-align:left">${l.name || ''}</td>
-        <td style="padding:6px 12px;text-align:left;color:var(--accent-dark);line-height:1.4">${l.summary || '無摘要'}</td>
-      </tr>
-    `;
+    html += `<tr>
+      <td style="color:var(--text-muted);font-family:monospace;text-align:left">${l.submittedAt||''}</td>
+      <td style="font-weight:bold;text-align:left">${l.empId||''}</td>
+      <td style="text-align:left">${l.name||''}</td>
+      <td style="color:var(--accent-dark);text-align:left">${l.summary||'無'}</td>
+    </tr>`;
   });
   body.innerHTML = html;
 }
@@ -712,23 +849,18 @@ function renderLogTable() {
 function exportToCSV() {
   const subs = cloudData.submissions || [];
   if(!subs.length) return alert('無任何資料可匯出');
-
   const dates = getPeriodDates();
   const headers = ['組別','員編','姓名','送出時間'].concat(dates.map(d => `${d.dateStr}(${d.wkName})`)).concat(['自願加班日期']);
   const rows = [headers];
 
   subs.forEach(s => {
-    const g = s.group === 'fixed' ? '固定班' : '輪班組';
-    const r = [g, s.empId, s.name, s.submittedAt];
-    dates.forEach(d => {
-      r.push(s.picks[d.dateStr] || '');
-    });
+    const r = [s.group==='fixed'?'固定班':'輪班組', s.empId, s.name, s.submittedAt];
+    dates.forEach(d => r.push(s.picks[d.dateStr] || ''));
     r.push((s.overtime || []).join(';'));
     rows.push(r);
   });
 
-  const bom = '﻿';
-  const csv = bom + rows.map(r => r.map(v => {
+  const csv = '﻿' + rows.map(r => r.map(v => {
     const s = String(v == null ? '' : v);
     return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
   }).join(',')).join('\n');
@@ -736,15 +868,12 @@ function exportToCSV() {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `劃假表_${cfg.startDate.replace(/-/g,'')}.csv`;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
+  a.href = url; a.download = `劃假表_${cfg.startDate.replace(/-/g,'')}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-// ═══════════ 後台管理權限與設定邏輯 ═══════════
+// ═══════════ 後台管理與設定邏輯 ═══════════
 let isAdminAuthenticated = false;
-
 function initAdminPage() {
   if(isAdminAuthenticated) {
     document.getElementById('admin-auth-card').style.display = 'none';
@@ -755,45 +884,32 @@ function initAdminPage() {
     document.getElementById('admin-main-box').style.display = 'none';
   }
 }
-
 function checkAdminAuth() {
-  const input = document.getElementById('admin-pw-input').value;
-  if(input === (cfg.adminPw || '1234')) {
-    isAdminAuthenticated = true;
-    initAdminPage();
-  } else {
-    alert('❌ 密碼錯誤！');
-  }
+  if(document.getElementById('admin-pw-input').value === (cfg.adminPw || '1234')) {
+    isAdminAuthenticated = true; initAdminPage();
+  } else alert('❌ 密碼錯誤！');
 }
-
 function switchAdminTab(subId) {
   document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.admin-sub-page').forEach(p => p.classList.remove('active'));
   document.getElementById(`atb-${subId}`).classList.add('active');
   document.getElementById(`asub-${subId}`).classList.add('active');
 }
-
 function fillAdminFields() {
   document.getElementById('cfg-start-date').value = cfg.startDate || '';
   document.getElementById('cfg-notice').value = cfg.noticeText || '';
   document.getElementById('cfg-pw').value = cfg.adminPw || '1234';
-  
-  const emps = cfg.employees || DEFAULT_CFG.employees;
-  document.getElementById('cfg-emps-fixed').value = JSON.stringify(emps.fixed || []);
-  document.getElementById('cfg-emps-rotate').value = JSON.stringify(emps.rotate || []);
-
+  document.getElementById('cfg-emps-fixed').value = JSON.stringify(cfg.employees?.fixed || []);
+  document.getElementById('cfg-emps-rotate').value = JSON.stringify(cfg.employees?.rotate || []);
   previewDates();
 }
-
 function previewDates() {
   const val = document.getElementById('cfg-start-date').value;
   if(!val) return;
-  
   const tempBase = new Date(val);
   const hWk = document.getElementById('cfg-grid-wk');
   const hDay = document.getElementById('cfg-grid-day');
   const rAct = document.getElementById('cfg-grid-action');
-  
   hWk.innerHTML = ''; hDay.innerHTML = ''; rAct.innerHTML = '';
 
   for(let i=0; i<28; i++) {
@@ -802,110 +918,76 @@ function previewDates() {
     const mm = String(d.getMonth()+1).padStart(2,'0');
     const dd = String(d.getDate()).padStart(2,'0');
     const dateStr = `${yyyy}-${mm}-${dd}`;
-    const wkName = WKNAMES[d.getDay()];
 
     let isHoliday = (d.getDay()===0 || d.getDay()===6);
     if(cfg.overtimeDates && cfg.overtimeDates[dateStr]) isHoliday = true;
     if(cfg.workDates && cfg.workDates[dateStr])     isHoliday = false;
 
-    const thWk = document.createElement('th');
-    thWk.innerText = wkName;
-    if(isHoliday) thWk.className = 'wk';
-    hWk.appendChild(thWk);
+    const thWk = document.createElement('th'); thWk.innerText = WKNAMES[d.getDay()];
+    if(isHoliday) thWk.className = 'wk'; hWk.appendChild(thWk);
 
-    const thDay = document.createElement('th');
-    thDay.innerText = d.getDate();
-    if(isHoliday) thDay.className = 'wk';
-    hDay.appendChild(thDay);
+    const thDay = document.createElement('th'); thDay.innerText = d.getDate();
+    if(isHoliday) thDay.className = 'wk'; hDay.appendChild(thDay);
 
     const td = document.createElement('td');
     const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn-pick';
-    btn.id = `cfg-pk-${dateStr}`;
-
-    if(cfg.overtimeDates && cfg.overtimeDates[dateStr]) {
-      btn.style.background = 'var(--x)'; btn.style.color = '#fff'; btn.innerText = '休';
-    } else if(cfg.workDates && cfg.workDates[dateStr]) {
-      btn.style.background = 'var(--a)'; btn.style.color = '#fff'; btn.innerText = '班';
-    } else {
-      btn.innerText = (d.getDay()===0 || d.getDay()===6) ? '休' : '班';
-    }
+    btn.type = 'button'; btn.className = 'cbadge';
+    
+    if(cfg.overtimeDates?.[dateStr]) { btn.style.background = 'var(--c-x)'; btn.style.color = '#fff'; btn.innerText = '休'; }
+    else if(cfg.workDates?.[dateStr]) { btn.style.background = 'var(--c-a)'; btn.style.color = '#fff'; btn.innerText = '班'; }
+    else { btn.innerText = (d.getDay()===0 || d.getDay()===6) ? '休' : '班'; }
 
     btn.onclick = () => {
       if(!cfg.overtimeDates) cfg.overtimeDates = {};
-      if(!cfg.workDates)     cfg.workDates = {};
-
+      if(!cfg.workDates) cfg.workDates = {};
       if(!cfg.overtimeDates[dateStr] && !cfg.workDates[dateStr]) {
-        cfg.overtimeDates[dateStr] = true;
-        btn.style.background = 'var(--x)'; btn.style.color = '#fff'; btn.innerText = '休';
+        cfg.overtimeDates[dateStr] = true; btn.style.background = 'var(--c-x)'; btn.style.color = '#fff'; btn.innerText = '休';
       } else if(cfg.overtimeDates[dateStr]) {
-        delete cfg.overtimeDates[dateStr];
-        cfg.workDates[dateStr] = true;
-        btn.style.background = 'var(--a)'; btn.style.color = '#fff'; btn.innerText = '班';
+        delete cfg.overtimeDates[dateStr]; cfg.workDates[dateStr] = true; btn.style.background = 'var(--c-a)'; btn.style.color = '#fff'; btn.innerText = '班';
       } else {
-        delete cfg.workDates[dateStr];
-        btn.style.background = ''; btn.style.color = '';
-        btn.innerText = (d.getDay()===0 || d.getDay()===6) ? '休' : '班';
+        delete cfg.workDates[dateStr]; btn.style.background = ''; btn.style.color = ''; btn.innerText = (d.getDay()===0 || d.getDay()===6) ? '休' : '班';
       }
     };
-
-    td.appendChild(btn);
-    rAct.appendChild(td);
+    td.appendChild(btn); rAct.appendChild(td);
   }
 }
-
 function doSaveConfig() {
   let fixedList = [], rotateList = [];
   try {
     fixedList = JSON.parse(document.getElementById('cfg-emps-fixed').value);
     rotateList = JSON.parse(document.getElementById('cfg-emps-rotate').value);
-  } catch(e) {
-    return alert('❌ 名單原始檔 JSON 格式有語法錯誤，請檢查括號與逗號！');
-  }
+  } catch(e) { return alert('❌ JSON 格式語法錯誤！'); }
 
-  const btn = document.getElementById('btn-save-cfg');
-  btn.innerText = '正在雲端存檔中...';
-  btn.disabled = true;
+  const b1 = document.getElementById('btn-save-cfg-1');
+  const b2 = document.getElementById('btn-save-cfg-2');
+  b1.disabled = b2.disabled = true; b1.innerText = b2.innerText = '雲端同步中...';
 
   cfg.startDate = document.getElementById('cfg-start-date').value;
   cfg.noticeText = document.getElementById('cfg-notice').value;
   cfg.adminPw = document.getElementById('cfg-pw').value;
   cfg.employees = { fixed: fixedList, rotate: rotateList };
 
-  cloudPost('saveConfig', { cfg: cfg }).then(res => {
-    alert('🎉 系統設定成功上傳至雲端試算表庫！');
-    buildPeriodGrid();
-    buildEmployeePage();
-  }).catch(err => {
-    alert('❌ 存檔失敗：' + err.toString());
-  }).finally(() => {
-    btn.innerText = '儲存設定並同步至雲端';
-    btn.disabled = false;
+  cloudPost('saveConfig', { cfg: cfg }).then(() => {
+    alert('🎉 系統設定已成功同步至 Google 試算表！');
+    buildPeriodGrid(); buildEmployeePage();
+  }).catch(err => alert(err.toString())).finally(() => {
+    b1.disabled = b2.disabled = false; b1.innerText = b2.innerText = '儲儲設定並同步至雲端';
   });
 }
 
-// ═══════════ 網頁初始化與首次背景同步 ═══════════
+// ═══════════ 初始化 ═══════════
 function init() {
-  buildEmployeePage(); 
-
+  buildEmployeePage();
   if(SCRIPT_URL) {
     cloudGet('getConfig').then(res => {
-      if(!res || !res.ok || !res.cfg) return;
-      const c = res.cfg;
-      const hasEmps = c.employees && ((c.employees.fixed || []).length > 0 || (c.employees.rotate || []).length > 0);
-      if(!hasEmps)         c.employees = cfg.employees || DEFAULT_CFG.employees;
-      if(!c.adminPw)       c.adminPw = cfg.adminPw || '1234';
-      if(!c.overtimeDates) c.overtimeDates = {};
-      if(!c.workDates)     c.workDates = {};
-      if(!c.noticeText)    c.noticeText = cfg.noticeText || DEFAULT_CFG.noticeText;
-
-      cfg = c;
-      buildEmployeePage();
-    }).catch(err => console.error("背景讀取雲端設定超時，使用本機快取作動。"));
+      if(res && res.ok && res.cfg) {
+        cfg = res.cfg;
+        if(!cfg.employees) cfg.employees = DEFAULT_CFG.employees;
+        buildEmployeePage();
+      }
+    });
   }
 }
-
 window.onload = init;
 </script>
 </body>
