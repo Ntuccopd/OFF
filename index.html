@@ -1286,8 +1286,11 @@ function init(){
     cloudGet('getConfig').then(res=>{
       if(res && res.ok && res.cfg){
         const c=res.cfg;
-        if(!c.employees)    c.employees    = DEFAULT_CFG.employees;
-        if(!c.adminPw)      c.adminPw      = '1234';
+        // Only apply if cloud config has valid employee data
+        const hasEmps = c.employees &&
+          ((c.employees.fixed||[]).length>0 || (c.employees.rotate||[]).length>0);
+        if(!hasEmps) c.employees = DEFAULT_CFG.employees;
+        if(!c.adminPw)      c.adminPw      = cfg.adminPw||'1234';
         if(!c.overtimeDates)c.overtimeDates= {};
         if(!c.workDates)    c.workDates    = {};
         if(!c.noticeText)   c.noticeText   = DEFAULT_CFG.noticeText;
@@ -1295,7 +1298,7 @@ function init(){
         if(!c.submitClose)  c.submitClose  = '';
         cfg = c;
         localStorage.setItem('leaveCfg', JSON.stringify(cfg));
-        buildEmployeePage(); // re-render with fresh config
+        buildEmployeePage();
       }
     }).catch(e=>console.warn('bg config load failed',e));
   }
