@@ -556,22 +556,49 @@ let adminAuthed = false;
 // Apps Script 網址（已內建，同仁不需設定）
 let SCRIPT_URL = localStorage.getItem('scriptUrl') || 'https://script.google.com/macros/s/AKfycbyph1QEGUsya5ohl2YDdKIfKYe2ytmqqQz4c_IZSYMYo5PEKhYjPpGjm2-CgweMAFzywg/exec';
 
+// 用 no-cors POST 送資料（fire and forget，解決 CORS）
 async function cloudPost(payload){
   if(!SCRIPT_URL) return null;
   try{
-    const r = await fetch(SCRIPT_URL, {
+    await fetch(SCRIPT_URL, {
       method:'POST',
+      mode:'no-cors',
       body: JSON.stringify(payload)
     });
-    return await r.json();
-  }catch(e){ console.warn('cloud error',e); return null; }
+    return {ok:true};
+  }catch(e){ console.warn('cloud post error',e); return null; }
 }
-async function cloudGet(action){
-  if(!SCRIPT_URL) return null;
-  try{
-    const r = await fetch(`${SCRIPT_URL}?action=${action}`);
-    return await r.json();
-  }catch(e){ console.warn('cloud error',e); return null; }
+
+// 用 script tag GET 讀資料（JSONP 方式，完全繞過 CORS）
+function cloudGet(action){
+  return new Promise((resolve)=>{
+    if(!SCRIPT_URL){resolve(null);return;}
+    const cbName='_cb'+Date.now();
+    const timeout=setTimeout(()=>{
+      delete window[cbName];
+      const s=document.getElementById(cbName);
+      if(s)s.remove();
+      console.warn('cloudGet timeout:',action);
+      resolve(null);
+    },8000);
+    window[cbName]=(data)=>{
+      clearTimeout(timeout);
+      delete window[cbName];
+      const s=document.getElementById(cbName);
+      if(s)s.remove();
+      resolve(data);
+    };
+    const s=document.createElement('script');
+    s.id=cbName;
+    s.src=`${SCRIPT_URL}?action=${action}&callback=${cbName}&t=${Date.now()}`;
+    s.onerror=()=>{
+      clearTimeout(timeout);
+      delete window[cbName];
+      s.remove();
+      resolve(null);
+    };
+    document.head.appendChild(s);
+  });
 }
 
 const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
