@@ -107,6 +107,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
 
 <div class="container">
   
+  <!-- 分頁一：填寫表單 -->
   <div id="page-form" class="page active">
     <div class="card">
       <div class="card-title">📢 劃假注意事項</div>
@@ -168,6 +169,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
     <button id="btn-submit" class="btn-main" onclick="doSubmitForm()" disabled>確認無誤，送出劃假</button>
   </div>
 
+  <!-- 分頁二：後台總覽 -->
   <div id="page-backend" class="page">
     <div class="sync-banner">
       <div class="sync-title"><span>📊</span> 雲端即時狀態總覽</div>
@@ -197,6 +199,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
     </div>
   </div>
 
+  <!-- 分頁三：填寫紀錄日誌 -->
   <div id="page-log" class="page">
     <div class="sync-banner">
       <div class="sync-title"><span>📋</span> 全員送出歷程流水帳</div>
@@ -220,6 +223,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
     </div>
   </div>
 
+  <!-- 分頁四：管理設定 -->
   <div id="page-admin" class="page">
     <div class="card" id="admin-auth-card">
       <div class="card-title">🔒 管理員權限驗證</div>
@@ -236,6 +240,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
         <button class="admin-tab-btn" id="atb-emps" onclick="switchAdminTab('emps')">名單編修</button>
       </div>
 
+      <!-- 管理子頁：基本設定 -->
       <div id="asub-basic" class="admin-sub-page active">
         <div class="card">
           <div class="form-group">
@@ -253,7 +258,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
         </div>
 
         <div class="card">
-          <div class="card-title">📅 当期国定假 / 补班日设定 (点击切换)</div>
+          <div class="card-title">📅 當期國定假 / 補班日設定 (點擊切換)</div>
           <p style="font-size:11px;color:var(--text-muted);margin-bottom:6px">橘色=不開放劃假(國定假) | 綠色=開放劃假(補班日)</p>
           <div class="table-wrap">
             <table class="grid-table">
@@ -270,6 +275,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
         <button class="btn-main" style="background:var(--admin);margin-bottom:15px" id="btn-save-cfg-1" onclick="doSaveConfig()">儲存設定並同步至雲端</button>
       </div>
 
+      <!-- 管理子頁：名單編修 -->
       <div id="asub-emps" class="admin-sub-page">
         <div class="card">
           <div class="card-title">👥 人員名單檔案 (JSON 格式)</div>
@@ -293,8 +299,8 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
 // ═══════════ 全域變數與核心設定 ═══════════
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6T868n6N6_6qgUonYh9xCH8nS77P4q0Fp2Wp2qR6V_uT9j3t-0MvMvD8LhYg-p5q0/exec';
 
-// 建立 11 人真實名單作為預設保護傘（1位主管、3位副主管、7位助理主管）
-const DEFAULT_CFG = {
+// 您原本在前端寫好的預設基本設定與同仁清單
+let cfg = {
   startDate: "2026-05-11",
   noticeText: "1. 請同仁於截止日前完成當期劃假。\n2. 特休(AP)請依各組額度酌量排定並提前報備。\n3. 送出後若需修改，在截止日前再次選擇姓名送出即可覆蓋舊紀錄。",
   adminPw: "1234",
@@ -312,7 +318,9 @@ const DEFAULT_CFG = {
   workDates: {}       
 };
 
-let cfg = JSON.parse(JSON.stringify(DEFAULT_CFG));
+// 複製一份作為防空備份傘
+const LOCAL_SAFE_EMPS = JSON.parse(JSON.stringify(cfg.employees));
+
 let cloudData = { submissions:[], submitLog:[] };
 let userPicks = {};      
 let userOvertime = [];   
@@ -534,7 +542,6 @@ function refreshBtnUi(idx, state) {
   btn.innerText = state;
 }
 
-// 確保重新選擇人時 UI 完全清除乾淨
 function resetGridUiValues() {
   const dates = getPeriodDates();
   dates.forEach((d, idx) => {
@@ -790,39 +797,41 @@ function doSaveConfig() {
   });
 }
 
-// ═══════════ INIT 核心修正安全閥 ═══════════
+// ═══════════ INIT 核心防覆蓋安全鎖 ═══════════
 function init(){
   showAdminTabs(false);
-  // 1. 先用前端預設好的 11 人黃金名單渲染畫面，確保開網頁必定有完整資料
+  
+  // 1. 一開網頁，直接用上面定義好的名單渲染
   buildEmployeePage();
   
-  // 2. 背景默默連線雲端試算表
+  // 2. 向雲端撈取設定
   if(SCRIPT_URL){
     cloudGet('getConfig').then(res=>{
-      // 安全檢查：若雲端回傳故障、或是根本沒有有效的同仁名單，直接放棄覆蓋，保護前端資料
+      // 【關鍵修正安全鎖】：如果雲端沒回應、或撈出來的設定裡面沒有任何名單資料
       if(!res || !res.ok || !res.cfg) return;
       
       const c = res.cfg;
-      const hasEmps = c.employees && 
+      const hasCloudEmps = c.employees && 
         ((c.employees.fixed && c.employees.fixed.length > 0) || 
          (c.employees.rotate && c.employees.rotate.length > 0));
       
-      // 如果雲端根本沒有存過名單，強制鎖定使用前端的黃金預設名單
-      if(!hasEmps) {
-        c.employees = JSON.parse(JSON.stringify(DEFAULT_CFG.employees));
+      // 如果撈回來的雲端名單是空的，就把備份的名單塞回 c 裡面，不讓它變成空白
+      if(!hasCloudEmps) {
+        c.employees = JSON.parse(JSON.stringify(LOCAL_SAFE_EMPS));
       }
       
-      if(!c.adminPw)        c.adminPw       = "1234";
+      // 補足缺漏欄位，確保資料結構完整
+      if(!c.adminPw)        c.adminPw       = cfg.adminPw;
       if(!c.overtimeDates)  c.overtimeDates = {};
       if(!c.workDates)      c.workDates     = {};
-      if(!c.noticeText)     c.noticeText    = DEFAULT_CFG.noticeText;
-      if(!c.startDate)      c.startDate     = DEFAULT_CFG.startDate;
+      if(!c.noticeText)     c.noticeText    = cfg.noticeText;
+      if(!c.startDate)      c.startDate     = cfg.startDate;
       
-      // 安全核對完畢才允許套用雲端資料
+      // 一切安全無誤後，才允許覆蓋並重新渲染
       cfg = c;
       buildEmployeePage();
     }).catch(err => {
-      console.warn("雲端目前尚未設定，已鎖定保護前端黃金設定。", err);
+      console.warn("目前無法讀取雲端設定，已自動啟用本機防護設定。", err);
     });
   }
 }
