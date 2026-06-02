@@ -1293,8 +1293,7 @@ function exportExcel(){
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-// ═══════════ INIT ═══════════
-// 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
+// ═══════════ 精準替換您檔案最底部的 init 區塊 ═══════════
 function init(){
   showAdminTabs(false);
   buildEmployeePage();
@@ -1316,17 +1315,17 @@ function init(){
       c.submitOpen =c.submitOpen||'';
       c.submitClose=c.submitClose||'';
       
-      // 【關鍵核心修正】：先將雲端撈回來的正確資料寫入變數與快取
       cfg=c;
       localStorage.setItem('leaveCfg',JSON.stringify(cfg));
       
-      // 修正：如果使用者已經在下拉選單選了名字，只更新公告文字與日期，不要強制重置整個人員選單，避免畫面閃爍或格子消失
+      // 【安全渲染鎖】：背景更新只更新公告和日期 preview，絕對不破壞同仁正選到一半的姓名選單結構
       document.getElementById('form-notice').innerText = cfg.noticeText || '';
       if (typeof buildPeriodGrid === 'function') {
         buildPeriodGrid();
       }
-      
-    }).catch(()=>{});
+    }).catch(err => {
+      console.warn("雲端讀取異常，改採本機快取防護機制", err);
+    });
   }
 }
 init();
