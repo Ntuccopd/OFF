@@ -556,42 +556,24 @@ let adminAuthed = false;
 // Apps Script 網址（已內建，同仁不需設定）
 let SCRIPT_URL = localStorage.getItem('scriptUrl') || 'https://script.google.com/macros/s/AKfycbyph1QEGUsya5ohl2YDdKIfKYe2ytmqqQz4c_IZSYMYo5PEKhYjPpGjm2-CgweMAFzywg/exec';
 
-// 送資料到雲端（fire and forget，完全不等，不卡頓）
-function cloudPost(payload){
-  if(!SCRIPT_URL) return;
-  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
-    .catch(()=>{});
+async function cloudPost(payload){
+  if(!SCRIPT_URL) return null;
+  try{
+    const r=await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify(payload),
+      headers:{'Content-Type':'text/plain'}
+    });
+    return await r.json();
+  }catch(e){console.warn('cloud post error',e);return null;}
 }
 
-// JSONP 讀取（完全繞過 CORS，Apps Script 已支援 callback 參數）
-function cloudGet(action){
-  return new Promise((resolve)=>{
-    if(!SCRIPT_URL){resolve(null);return;}
-    const cb='_cb'+Date.now()+'_'+Math.floor(Math.random()*9999);
-    const timer=setTimeout(()=>{
-      delete window[cb];
-      const el=document.getElementById(cb);
-      if(el)el.remove();
-      resolve(null);
-    },8000);
-    window[cb]=(data)=>{
-      clearTimeout(timer);
-      delete window[cb];
-      const el=document.getElementById(cb);
-      if(el)el.remove();
-      resolve(data);
-    };
-    const s=document.createElement('script');
-    s.id=cb;
-    s.src=`${SCRIPT_URL}?action=${action}&callback=${cb}&t=${Date.now()}`;
-    s.onerror=()=>{
-      clearTimeout(timer);
-      delete window[cb];
-      s.remove();
-      resolve(null);
-    };
-    document.head.appendChild(s);
-  });
+async function cloudGet(action){
+  if(!SCRIPT_URL) return null;
+  try{
+    const r=await fetch(`${SCRIPT_URL}?action=${action}&t=${Date.now()}`);
+    return await r.json();
+  }catch(e){console.warn('cloud get error',e);return null;}
 }
 
 const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
@@ -1032,10 +1014,33 @@ function updateCloudStatus(){
     el.textContent = '尚未設定網址';
   }
 }
-function loadCloudConfig(){
-  // 設定已存在 localStorage，管理員直接在此修改即可
-  showToast('✅ 設定已從本機載入');
-  renderAdminContent();
+async function loadCloudConfig(){
+  showToast('⏳ 從雲端載入設定…');
+  try{
+    const res=await cloudGet('getConfig');
+    if(res&&res.ok&&res.cfg){
+      const c=res.cfg;
+      const hasEmps=c.employees&&
+        ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
+      if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
+      if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
+      if(!c.overtimeDates)  c.overtimeDates={};
+      if(!c.workDates)      c.workDates    ={};
+      if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
+      if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
+      if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
+      if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
+      c.submitOpen =c.submitOpen||'';
+      c.submitClose=c.submitClose||'';
+      cfg=c;
+      localStorage.setItem('leaveCfg',JSON.stringify(cfg));
+      showToast('✅ 已從雲端載入最新設定');
+      buildEmployeePage();
+      if(adminAuthed)renderAdminContent();
+    }else{
+      showToast('⚠️ 雲端無資料');
+    }
+  }catch(e){showToast('⚠️ 連線失敗');}
 }
 
 function showToast(msg){
@@ -1046,7 +1051,6 @@ function showToast(msg){
 
 // ═══════════ BACKEND ═══════════
 async function refreshBackend(){
-  if(!SCRIPT_URL){showToast('⚠️ 未設定雲端網址');return;}
   showToast('⏳ 載入中…');
   try{
     const res=await cloudGet('getData');
@@ -1061,10 +1065,10 @@ async function refreshBackend(){
       }
       showToast('✅ 已更新');
       renderBackend();
-    } else {
-      showToast('⚠️ 連線失敗，請稍後再試');
+    }else{
+      showToast('⚠️ 連線失敗');
     }
-  }catch(e){ showToast('⚠️ 連線失敗'); }
+  }catch(e){showToast('⚠️ 連線失敗');}
 }
 
 function renderBackend(){
@@ -1293,8 +1297,8 @@ function exportExcel(){
 // 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
 function init(){
   showAdminTabs(false);
-  buildEmployeePage(); // 先顯示本機設定，不卡頓
-  // 背景拉雲端最新設定
+  buildEmployeePage();
+  // 背景拉雲端最新設定，不阻擋頁面顯示
   if(SCRIPT_URL){
     cloudGet('getConfig').then(res=>{
       if(!res||!res.ok||!res.cfg) return;
