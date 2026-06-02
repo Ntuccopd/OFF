@@ -253,7 +253,7 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
         </div>
 
         <div class="card">
-          <div class="card-title">📅 當期國定假 / 補班日設定 (點擊切換)</div>
+          <div class="card-title">📅 当期国定假 / 补班日设定 (点击切换)</div>
           <p style="font-size:11px;color:var(--text-muted);margin-bottom:6px">橘色=不開放劃假(國定假) | 綠色=開放劃假(補班日)</p>
           <div class="table-wrap">
             <table class="grid-table">
@@ -293,18 +293,19 @@ body {font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tex
 // ═══════════ 全域變數與核心設定 ═══════════
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6T868n6N6_6qgUonYh9xCH8nS77P4q0Fp2Wp2qR6V_uT9j3t-0MvMvD8LhYg-p5q0/exec';
 
+// 建立 11 人真實名單作為預設保護傘（1位主管、3位副主管、7位助理主管）
 const DEFAULT_CFG = {
   startDate: "2026-05-11",
-  noticeText: "1. 請於截止日前完成劃假。\n2. 特休(AP)請依各組剩餘額度酌量排定。\n3. 送出後如需重劃，在截止日前再次送出即可覆蓋舊紀錄。",
+  noticeText: "1. 請同仁於截止日前完成當期劃假。\n2. 特休(AP)請依各組額度酌量排定並提前報備。\n3. 送出後若需修改，在截止日前再次選擇姓名送出即可覆蓋舊紀錄。",
   adminPw: "1234",
   employees: {
     fixed: [
-      {id:"1001",name:"同仁A"},{id:"1002",name:"同仁B"},{id:"1003",name:"同仁C"},
-      {id:"1004",name:"同仁D"},{id:"1005",name:"同仁E"},{id:"1006",name:"同仁F"}
+      {id:"1001",name:"科室主管"}
     ],
     rotate: [
-      {id:"2001",name:"同仁G"},{id:"2002",name:"同仁H"},{id:"2003",name:"同仁I"},
-      {id:"2004",name:"同仁J"},{id:"2005",name:"同仁K"}
+      {id:"2001",name:"副理A"},{id:"2002",name:"副理B"},{id:"2003",name:"副理C"},
+      {id:"3001",name:"組長A"},{id:"3002",name:"組長B"},{id:"3003",name:"組長C"},
+      {id:"3004",name:"組長D"},{id:"3005",name:"組長E"},{id:"3006",name:"組長F"},{id:"3007",name:"組長G"}
     ]
   },
   overtimeDates: {}, 
@@ -319,32 +320,23 @@ let userOvertime = [];
 const STATES = ['', 'X', 'AP', 'M2', 'A', 'P'];
 const WKNAMES = ['日','一','二','三','四','五','六'];
 
-// ═══════════ 🛠️ 核心修正：將原本錯誤的 fetch 改回真正的 JSONP 方式 ═══════════
+// ═══════════ JSONP 安全通訊 ═══════════
 function cloudGet(action) {
   if (!SCRIPT_URL) return Promise.resolve(null);
   return new Promise((resolve, reject) => {
-    // 1. 自動產生每次請求都唯一的隨機 callback 名稱
     const callbackName = 'jsonp_' + Math.floor(Math.random() * 1000000);
-    
-    // 2. 將這個暫時的函式綁定到全域視窗中，好讓 Apps Script 執行它
     window[callbackName] = function(data) {
-      delete window[callbackName];            // 資料處理完畢後隨手銷毀
-      document.body.removeChild(script);      // 移除載入的標籤
+      delete window[callbackName];
+      document.body.removeChild(script);
       resolve(data);
     };
-    
-    // 3. 建立 script 標籤，並將引數 callback 傳遞給後端配合支援
     const script = document.createElement('script');
-    // 強加入 _t= 時間戳記，避免手機或網頁瀏覽器儲存失敗快取
     script.src = `${SCRIPT_URL}?action=${action}&callback=${callbackName}&_t=${Date.now()}`;
-    
-    // 4. 連線出錯安全閥
     script.onerror = (err) => {
       delete window[callbackName];
       try { document.body.removeChild(script); } catch(e){}
       reject(err);
     };
-    
     document.body.appendChild(script);
   });
 }
@@ -542,6 +534,7 @@ function refreshBtnUi(idx, state) {
   btn.innerText = state;
 }
 
+// 確保重新選擇人時 UI 完全清除乾淨
 function resetGridUiValues() {
   const dates = getPeriodDates();
   dates.forEach((d, idx) => {
@@ -797,27 +790,39 @@ function doSaveConfig() {
   });
 }
 
-// ═══════════ INIT ═══════════
+// ═══════════ INIT 核心修正安全閥 ═══════════
 function init(){
   showAdminTabs(false);
+  // 1. 先用前端預設好的 11 人黃金名單渲染畫面，確保開網頁必定有完整資料
   buildEmployeePage();
   
+  // 2. 背景默默連線雲端試算表
   if(SCRIPT_URL){
     cloudGet('getConfig').then(res=>{
-      if(!res||!res.ok||!res.cfg) return;
+      // 安全檢查：若雲端回傳故障、或是根本沒有有效的同仁名單，直接放棄覆蓋，保護前端資料
+      if(!res || !res.ok || !res.cfg) return;
+      
       const c = res.cfg;
-      const hasEmps = c.employees && ((c.employees.fixed||[]).length>0 || (c.employees.rotate||[]).length>0);
-      if(!hasEmps)          c.employees     = cfg.employees || DEFAULT_CFG.employees;
-      if(!c.adminPw)        c.adminPw       = cfg.adminPw || '1234';
+      const hasEmps = c.employees && 
+        ((c.employees.fixed && c.employees.fixed.length > 0) || 
+         (c.employees.rotate && c.employees.rotate.length > 0));
+      
+      // 如果雲端根本沒有存過名單，強制鎖定使用前端的黃金預設名單
+      if(!hasEmps) {
+        c.employees = JSON.parse(JSON.stringify(DEFAULT_CFG.employees));
+      }
+      
+      if(!c.adminPw)        c.adminPw       = "1234";
       if(!c.overtimeDates)  c.overtimeDates = {};
       if(!c.workDates)      c.workDates     = {};
-      if(!c.noticeText)     c.noticeText    = cfg.noticeText || DEFAULT_CFG.noticeText;
-      if(!c.startDate)      c.startDate     = cfg.startDate || DEFAULT_CFG.startDate;
+      if(!c.noticeText)     c.noticeText    = DEFAULT_CFG.noticeText;
+      if(!c.startDate)      c.startDate     = DEFAULT_CFG.startDate;
       
+      // 安全核對完畢才允許套用雲端資料
       cfg = c;
       buildEmployeePage();
     }).catch(err => {
-      console.error("雲端載入失敗，已切換至預備本機設定。", err);
+      console.warn("雲端目前尚未設定，已鎖定保護前端黃金設定。", err);
     });
   }
 }
