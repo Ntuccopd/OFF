@@ -556,43 +556,23 @@ let adminAuthed = false;
 // Apps Script 網址（已內建，同仁不需設定）
 let SCRIPT_URL = localStorage.getItem('scriptUrl') || 'https://script.google.com/macros/s/AKfycbyph1QEGUsya5ohl2YDdKIfKYe2ytmqqQz4c_IZSYMYo5PEKhYjPpGjm2-CgweMAFzywg/exec';
 
-// POST：fire and forget，no-cors 送出不等回應
-function cloudPost(payload){
-  if(!SCRIPT_URL) return;
-  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
-    .catch(()=>{});
+async function cloudPost(payload){
+  if(!SCRIPT_URL) return null;
+  try{
+    await fetch(SCRIPT_URL,{
+      method:'POST',
+      body:JSON.stringify(payload)
+    });
+    return {ok:true};
+  }catch(e){return null;}
 }
 
-// GET：用 JSONP 完全繞過 CORS（配合 Apps Script callback 參數）
-function cloudGet(action){
-  return new Promise((resolve)=>{
-    if(!SCRIPT_URL){resolve(null);return;}
-    const cb='_cb'+Date.now()+'_'+Math.floor(Math.random()*9999);
-    const timer=setTimeout(()=>{
-      delete window[cb];
-      const el=document.getElementById(cb);
-      if(el)el.remove();
-      console.warn('cloudGet timeout:',action);
-      resolve(null);
-    },10000);
-    window[cb]=(data)=>{
-      clearTimeout(timer);
-      delete window[cb];
-      const el=document.getElementById(cb);
-      if(el)el.remove();
-      resolve(data);
-    };
-    const s=document.createElement('script');
-    s.id=cb;
-    s.src=`${SCRIPT_URL}?action=${action}&callback=${cb}&t=${Date.now()}`;
-    s.onerror=()=>{
-      clearTimeout(timer);
-      delete window[cb];
-      s.remove();
-      resolve(null);
-    };
-    document.head.appendChild(s);
-  });
+async function cloudGet(action){
+  if(!SCRIPT_URL) return null;
+  try{
+    const r=await fetch(`${SCRIPT_URL}?action=${action}&t=${Date.now()}`);
+    return await r.json();
+  }catch(e){return null;}
 }
 
 const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
@@ -650,9 +630,51 @@ function showAdminLogin(){
   setTimeout(()=>document.getElementById('admin-pw').focus(),100);
 }
 function closeAdminModal(){document.getElementById('admin-modal').style.display='none';}
-function adminLogin(){
+async function adminLogin(){
   if(document.getElementById('admin-pw').value===cfg.adminPw){
     adminAuthed=true;closeAdminModal();showAdminTabs(true);switchPage('admin');
+    // 登入時自動從雲端拉最新設定和資料
+    if(SCRIPT_URL){
+      showToast('⏳ 載入最新資料…');
+      try{
+        const [cfgRes, dataRes] = await Promise.all([
+          cloudGet('getConfig'),
+          cloudGet('getData')
+        ]);
+        if(cfgRes&&cfgRes.ok&&cfgRes.cfg){
+          const c=cfgRes.cfg;
+          const hasEmps=c.employees&&
+            ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
+          if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
+          if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
+          if(!c.overtimeDates)  c.overtimeDates={};
+          if(!c.workDates)      c.workDates    ={};
+          if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
+          if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
+          if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
+          if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
+          c.submitOpen =c.submitOpen||'';
+          c.submitClose=c.submitClose||'';
+          cfg=c;
+          localStorage.setItem('leaveCfg',JSON.stringify(cfg));
+        }
+        if(dataRes&&dataRes.ok){
+          if(dataRes.submissions){
+            submissions=dataRes.submissions;
+            localStorage.setItem('leaveSubmissions',JSON.stringify(submissions));
+          }
+          if(dataRes.submitLog){
+            submitLog=dataRes.submitLog;
+            localStorage.setItem('leaveSubmitLog',JSON.stringify(submitLog));
+          }
+        }
+        showToast('✅ 資料已更新');
+        renderAdminContent();
+        renderBackend();
+      }catch(e){
+        showToast('⚠️ 雲端連線失敗，顯示本機資料');
+      }
+    }
   }else{alert('密碼錯誤！');document.getElementById('admin-pw').value='';}
 }
 function adminLogout(){adminAuthed=false;showAdminTabs(false);switchPage('employee');}
