@@ -1293,42 +1293,43 @@ function exportExcel(){
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-// ═══════════ 用這段精準替換您最底部的 init 函式 ═══════════
+// ═══════════ INIT ═══════════
+// 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
 function init(){
   showAdminTabs(false);
-  
-  // 1. 一開網頁，直接用您前端原本寫好的預設名單先渲染畫面
   buildEmployeePage();
-  
-  // 2. 向雲端撈取設定
+  // 背景拉雲端最新設定，不阻擋頁面顯示
   if(SCRIPT_URL){
     cloudGet('getConfig').then(res=>{
-      // 【關鍵安全鎖】：如果雲端回應失敗、或撈出來的設定裡面完全沒有名單
-      if(!res || !res.ok || !res.cfg) return;
+      if(!res||!res.ok||!res.cfg) return;
+      const c=res.cfg;
+      const hasEmps=c.employees&&
+        ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
+      if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
+      if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
+      if(!c.overtimeDates)  c.overtimeDates={};
+      if(!c.workDates)      c.workDates    ={};
+      if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
+      if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
+      if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
+      if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
+      c.submitOpen =c.submitOpen||'';
+      c.submitClose=c.submitClose||'';
       
-      const c = res.cfg;
-      const hasCloudEmps = c.employees && 
-        ((c.employees.fixed && c.employees.fixed.length > 0) || 
-         (c.employees.rotate && c.employees.rotate.length > 0));
+      // 【關鍵核心修正】：先將雲端撈回來的正確資料寫入變數與快取
+      cfg=c;
+      localStorage.setItem('leaveCfg',JSON.stringify(cfg));
       
-      // 如果撈回來的雲端名單是空的，強行保留您原本前端畫面的完美名單，絕對不覆蓋！
-      if(!hasCloudEmps) {
-        c.employees = cfg.employees; 
+      // 修正：如果使用者已經在下拉選單選了名字，只更新公告文字與日期，不要強制重置整個人員選單，避免畫面閃爍或格子消失
+      document.getElementById('form-notice').innerText = cfg.noticeText || '';
+      if (typeof buildPeriodGrid === 'function') {
+        buildPeriodGrid();
       }
       
-      // 補足其餘可能缺漏的雲端欄位
-      if(!c.adminPw)        c.adminPw       = cfg.adminPw || '1234';
-      if(!c.overtimeDates)  c.overtimeDates = cfg.overtimeDates || {};
-      if(!c.workDates)      c.workDates     = cfg.workDates || {};
-      if(!c.noticeText)     c.noticeText    = cfg.noticeText;
-      if(!c.startDate)      c.startDate     = cfg.startDate;
-      
-      // 一切核對安全後，才套用雲端設定並更新畫面
-      cfg = c;
-      buildEmployeePage();
-    }).catch(err => {
-      console.warn("雲端讀取異常，已鎖定本機防護設定。", err);
-    });
+    }).catch(()=>{});
   }
 }
-window.onload = init;
+init();
+</script>
+</body>
+</html>
