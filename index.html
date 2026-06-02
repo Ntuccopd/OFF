@@ -1293,99 +1293,32 @@ function exportExcel(){
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-// ═══════════ 標準通訊模組（精準貼在 init 的正上方） ═══════════
-function cloudGet(action) {
-  if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) return Promise.resolve(null);
-  return new Promise((resolve, reject) => {
-    const callbackName = 'jsonp_' + Math.floor(Math.random() * 1000000);
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      try { document.body.removeChild(script); } catch(e){}
-      resolve(data);
-    };
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?action=${action}&callback=${callbackName}&_t=${Date.now()}`;
-    script.onerror = (err) => {
-      delete window[callbackName];
-      try { document.body.removeChild(script); } catch(e){}
-      reject(err);
-    };
-    document.body.appendChild(script);
-  });
-}
-
-function cloudPost(action, payload) {
-  if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) {
-    return Promise.resolve({ ok: false, error: '無 API 網址' });
-  }
-  const body = Object.assign({ action: action }, payload);
-  
-  // 使用標準 fetch POST 方式傳送，配合後台的 doPost
-  return fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors', // 允許跨網域傳送至 Google
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(() => {
-    return { ok: true }; // no-cors 模式下只要發出即視為成功
-  }).catch(err => {
-    console.error('Post Error:', err);
-    return { ok: false, error: err.toString() };
-  });
-}
-
 // ═══════════ INIT ═══════════
 // 每次開頁面都從雲端拉最新設定，確保同仁看到管理員最新內容
 function init(){
   showAdminTabs(false);
-  
-  // 先用網頁原本寫好的同仁名單與設定渲染畫面，確保畫面第一時間絕對是完整的
   buildEmployeePage();
-  
-  // 安全檢查：如果找不到 SCRIPT_URL，或者是 cloudGet 函式出問題，直接走本機模式，不報錯
-  if(typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL && typeof cloudGet === 'function'){
-    
-    // 建立一個 5 秒鐘的防卡死機制，避免雲端回應太慢導致網頁顯示「連線失敗」
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), 5000)
-    );
-    
-    Promise.race([cloudGet('getConfig'), timeoutPromise])
-      .then(res => {
-        if(!res||!res.ok||!res.cfg) return;
-        const c=res.cfg;
-        const hasEmps=c.employees&&
-          ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
-          
-        // 如果雲端拉回來的名單是空的，強制留住您前端原本寫好的完美名單，絕對不讓它變空白
-        if(!hasEmps)          c.employees    =cfg.employees||(typeof DEFAULT_CFG !== 'undefined' ? DEFAULT_CFG.employees : {});
-        if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
-        if(!c.overtimeDates)  c.overtimeDates={};
-        if(!c.workDates)      c.workDates    ={};
-        if(!c.noticeText)     c.noticeText   =cfg.noticeText||(typeof DEFAULT_CFG !== 'undefined' ? DEFAULT_CFG.noticeText : '');
-        if(!c.startDate)      c.startDate    =cfg.startDate||(typeof DEFAULT_CFG !== 'undefined' ? DEFAULT_CFG.startDate : '');
-        if(!c.tours)          c.tours        =cfg.tours||(typeof DEFAULT_CFG !== 'undefined' ? DEFAULT_CFG.tours : []);
-        if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
-        c.submitOpen =c.submitOpen||'';
-        c.submitClose=c.submitClose||'';
-        
-        cfg=c;
-        localStorage.setItem('leaveCfg',JSON.stringify(cfg));
-        
-        // 【安全渲染鎖】：背景更新只精準修正公告文字，絕對不去重置已經選好的姓名下拉選單，100%守住排版
-        const noticeBox = document.getElementById('form-notice');
-        if (noticeBox) noticeBox.innerText = cfg.noticeText || '';
-        
-        // 如果同仁還沒開始選名字（也就是 calendar-card 還是隱藏的），才更新底層的日期
-        const calCard = document.getElementById('calendar-card');
-        if ((!calCard || calCard.style.display === 'none') && typeof buildPeriodGrid === 'function') {
-          buildPeriodGrid();
-        }
-      })
-      .catch(err => {
-        // 核心防護：不論是網路斷線、API 網址貼錯、還是超時，都在這裡靜悄悄吸收掉，絕對不跳出連線失敗的彈窗
-        console.warn("目前無法即時連線雲端設定，已自動啟用本機防護設定運作。", err);
-      });
+  // 背景拉雲端最新設定，不阻擋頁面顯示
+  if(SCRIPT_URL){
+    cloudGet('getConfig').then(res=>{
+      if(!res||!res.ok||!res.cfg) return;
+      const c=res.cfg;
+      const hasEmps=c.employees&&
+        ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
+      if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
+      if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
+      if(!c.overtimeDates)  c.overtimeDates={};
+      if(!c.workDates)      c.workDates    ={};
+      if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
+      if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
+      if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
+      if(!c.weekendWorkers) c.weekendWorkers=cfg.weekendWorkers||{};
+      c.submitOpen =c.submitOpen||'';
+      c.submitClose=c.submitClose||'';
+      cfg=c;
+      localStorage.setItem('leaveCfg',JSON.stringify(cfg));
+      buildEmployeePage();
+    }).catch(()=>{});
   }
 }
 init();
