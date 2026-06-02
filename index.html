@@ -1293,7 +1293,7 @@ function exportExcel(){
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-// ═══════════ 終極穿透版雲端通訊模組（精準替換 init 正上方這兩段） ═══════════
+// ═══════════ 標準通訊模組（精準貼在 init 的正上方） ═══════════
 function cloudGet(action) {
   if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) return Promise.resolve(null);
   return new Promise((resolve, reject) => {
@@ -1318,31 +1318,19 @@ function cloudPost(action, payload) {
   if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) {
     return Promise.resolve({ ok: false, error: '無 API 網址' });
   }
-  return new Promise((resolve) => {
-    const callbackName = 'jsonp_post_' + Math.floor(Math.random() * 1000000);
-    
-    // 建立一個臨時的全域回傳通道
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      try { document.body.removeChild(script); } catch(e){}
-      resolve(data || { ok: true });
-    };
-
-    // 將要送出的資料，打包編碼成網址參數
-    const encodedPayload = encodeURIComponent(JSON.stringify(payload));
-    const script = document.createElement('script');
-    
-    // 透過 GET + JSONP 的方式穿透所有網域限制送出
-    script.src = `${SCRIPT_URL}?action=${action}&vData=${encodedPayload}&callback=${callbackName}&_t=${Date.now()}`;
-    
-    script.onerror = () => {
-      delete window[callbackName];
-      try { document.body.removeChild(script); } catch(e){}
-      // 就算腳本載入報錯，只要請求有發出去通常 Google 就有收到，所以強制視為成功，不讓網頁彈出連線失敗
-      resolve({ ok: true });
-    };
-    
-    document.body.appendChild(script);
+  const body = Object.assign({ action: action }, payload);
+  
+  // 使用標準 fetch POST 方式傳送，配合後台的 doPost
+  return fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors', // 允許跨網域傳送至 Google
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(() => {
+    return { ok: true }; // no-cors 模式下只要發出即視為成功
+  }).catch(err => {
+    console.error('Post Error:', err);
+    return { ok: false, error: err.toString() };
   });
 }
 
