@@ -1145,7 +1145,7 @@ function renderBackend(){
   document.getElementById('be-meta').textContent=`共 ${filtered.length} 位同仁已送出`;
 
   // OT dates that admin opened
-  const otDates=dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+  const otDates=dates.filter(d=>cfg.overtimeDates[d.key]);
 
   // HEAD: 員編 | 姓名 | 28 dates | OT dates (each col)
   let hh=`<tr><th>員編</th><th>姓名</th>`;
@@ -1230,7 +1230,7 @@ function syncNoticeToEditor(){ cfg.noticeText=document.getElementById('cfg-notic
 // ═══════════ LOG PAGE ═══════════
 async function renderLog(){
   const dates=genDates(cfg.startDate);
-  const otDates=dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+  const otDates=dates.filter(d=>cfg.overtimeDates[d.key]);
   const q=(document.getElementById('log-search')||{}).value||'';
   const filtered=[...submitLog]
     .filter(r=>r.empId.includes(q)||r.name.includes(q))
@@ -1302,7 +1302,7 @@ function clearLog(){
 function exportExcel(){
   const dates = genDates(cfg.startDate);
   const last  = dates[dates.length-1];
-  const otDates = dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+  const otDates = dates.filter(d=>cfg.overtimeDates[d.key]);
 
   // Build header row
   const header = ['員編','姓名','組別','送出時間'];
