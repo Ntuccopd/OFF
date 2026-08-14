@@ -567,12 +567,34 @@ async function cloudPost(payload){
   }catch(e){return null;}
 }
 
-async function cloudGet(action){
-  if(!SCRIPT_URL) return null;
-  try{
-    const r=await fetch(`${SCRIPT_URL}?action=${action}&t=${Date.now()}`);
-    return await r.json();
-  }catch(e){return null;}
+function cloudGet(action){
+  return new Promise((resolve)=>{
+    if(!SCRIPT_URL){resolve(null);return;}
+    const cb='_cb'+Date.now()+'_'+Math.floor(Math.random()*9999);
+    const timer=setTimeout(()=>{
+      delete window[cb];
+      const el=document.getElementById(cb);
+      if(el)el.remove();
+      resolve(null);
+    },10000);
+    window[cb]=(data)=>{
+      clearTimeout(timer);
+      delete window[cb];
+      const el=document.getElementById(cb);
+      if(el)el.remove();
+      resolve(data);
+    };
+    const s=document.createElement('script');
+    s.id=cb;
+    s.src=`${SCRIPT_URL}?action=${action}&callback=${cb}&t=${Date.now()}`;
+    s.onerror=()=>{
+      clearTimeout(timer);
+      delete window[cb];
+      s.remove();
+      resolve(null);
+    };
+    document.head.appendChild(s);
+  });
 }
 
 const TYPES   = [{id:'X',label:'X'},{id:'AP',label:'AP'},{id:'M2',label:'-2'},{id:'A',label:'A'},{id:'P',label:'P'}];
@@ -1065,8 +1087,8 @@ async function loadCloudConfig(){
         ((c.employees.fixed||[]).length>0||(c.employees.rotate||[]).length>0);
       if(!hasEmps)          c.employees    =cfg.employees||DEFAULT_CFG.employees;
       if(!c.adminPw)        c.adminPw      =cfg.adminPw||'1234';
-      if(!c.overtimeDates)  c.overtimeDates={};
-      if(!c.workDates)      c.workDates    ={};
+      if(!c.overtimeDates)  c.overtimeDates=c.overtimeDates||{};
+      if(c.workDates===undefined) c.workDates={};
       if(!c.noticeText)     c.noticeText   =cfg.noticeText||DEFAULT_CFG.noticeText;
       if(!c.startDate)      c.startDate    =cfg.startDate||DEFAULT_CFG.startDate;
       if(!c.tours)          c.tours        =cfg.tours||DEFAULT_CFG.tours;
