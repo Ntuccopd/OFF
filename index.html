@@ -813,7 +813,7 @@ function buildCalendar(dates){
 
 function buildOvertimeTable(dates){
   // Only show dates that admin has opened for volunteer OT
-  const otDates=dates.filter(d=>isWeekend(d)&&cfg.overtimeDates[d.key]);
+  const otDates=dates.filter(d=>cfg.overtimeDates[d.key]);
   const wrap=document.getElementById('ot-wrap');
   if(!otDates.length){wrap.style.display='none';return;}
   wrap.style.display='';
